@@ -90,6 +90,36 @@ def fallback_headlines(topic, label=""):
     return [item for item in templates if not (item in seen or seen.add(item))][:30]
 
 
+def fallback_top_n_judgment(label):
+    """뉴스·정책·리콜처럼 순위보다 확인 절차가 중요한 주제의 기본 판단."""
+    lowered = str(label or "")
+    if any(word in lowered for word in ("정책", "리콜", "최신 이슈", "방송연예", "스포츠")):
+        return {
+            "result": "부분 적합(소제목용)",
+            "recommended_number": None,
+            "type": "뉴스·변경형",
+            "reason": "확정된 대상·일정·영향을 먼저 확인하는 주제라 TOP N은 본문 소제목에 더 적합합니다.",
+        }
+    return {
+        "result": "부분 적합(소제목용)",
+        "recommended_number": None,
+        "type": "독자 실익형",
+        "reason": "기사 원문과 공식 자료를 확인한 뒤 여러 항목으로 나눌 수 있을 때 TOP N을 사용합니다.",
+    }
+
+
+def fallback_headline_metadata(headlines):
+    return [
+        {
+            "title": title,
+            "frame": "정보형",
+            "source_article_ids": [],
+            "evidence_status": "원문 확인 필요",
+        }
+        for title in headlines[:30]
+    ]
+
+
 def stems(title):
     words = re.findall(r"[가-힣]{2,}|[A-Za-z]{3,}|\d{2,}", str(title or ""))
     return {w[:2] for w in words if w not in STOP}
@@ -134,6 +164,7 @@ def default_landing(label, topic, basis, articles):
             "건강 정보는 공식 기관·의료기관 자료를 우선 확인하세요.",
             "진단·치료 효과를 단정하거나 확인되지 않은 소문을 사실처럼 쓰지 마세요.",
         ]
+    headlines = fallback_headlines(topic, label)
     return {
         "lead": basis or topic,
         "verification_note": "기사 요약만으로 확정하기 어려운 내용은 원문과 공식 공시를 먼저 확인하세요.",
@@ -153,7 +184,9 @@ def default_landing(label, topic, basis, articles):
             "추가 확인: 기사별로 다른 수치·일정·영향",
             "독자용 체크리스트와 마무리",
         ],
-        "headline_options": fallback_headlines(topic, label),
+        "top_n_judgment": fallback_top_n_judgment(label),
+        "headline_options": headlines,
+        "headline_metadata": fallback_headline_metadata(headlines),
         "keywords": [topic],
         "internal_link_ideas": [],
         "cautions": cautions,
@@ -167,22 +200,80 @@ def normalize_landing(label, topic, basis, articles, value):
         return result
     list_fields = {
         "confirmed_facts", "reader_steps", "practical_points", "writing_structure",
-        "headline_options", "keywords", "internal_link_ideas", "cautions",
+        "keywords", "internal_link_ideas", "cautions",
     }
     for field in list_fields:
         items = value.get(field)
         if isinstance(items, list):
             clean = [str(item).strip() for item in items if str(item).strip()]
             if clean:
-                result[field] = clean[:30 if field == "headline_options" else 8]
+                result[field] = clean[:8]
+    raw_headlines = value.get("headline_options")
+    if isinstance(raw_headlines, list):
+        headlines = []
+        metadata = []
+        for item in raw_headlines:
+            if isinstance(item, dict):
+                title = str(item.get("title") or item.get("headline") or "").strip()
+                frame = str(item.get("frame") or "").strip()
+                refs = item.get("source_article_ids") or item.get("article_ids") or []
+                refs = [int(ref) for ref in refs if isinstance(ref, int) and not isinstance(ref, bool)]
+                evidence = str(item.get("evidence_status") or "원문 확인 필요").strip()
+            else:
+                title = str(item or "").strip()
+                frame, refs, evidence = "", [], "원문 확인 필요"
+            if title and title not in headlines:
+                headlines.append(title)
+                metadata.append({
+                    "title": title,
+                    "frame": frame or "정보형",
+                    "source_article_ids": refs[:3],
+                    "evidence_status": evidence,
+                })
+            if len(headlines) >= 30:
+                break
+        if headlines:
+            result["headline_options"] = headlines
+            result["headline_metadata"] = metadata
+    if isinstance(value.get("headline_metadata"), list):
+        for item in value["headline_metadata"]:
+            if not isinstance(item, dict):
+                continue
+            title = str(item.get("title") or "").strip()
+            for meta in result.get("headline_metadata", []):
+                if meta.get("title") == title:
+                    meta["frame"] = str(item.get("frame") or meta.get("frame") or "정보형").strip()
+                    meta["evidence_status"] = str(
+                        item.get("evidence_status") or meta.get("evidence_status") or "원문 확인 필요"
+                    ).strip()
+                    break
+    judgment = value.get("top_n_judgment")
+    if isinstance(judgment, dict):
+        recommended = judgment.get("recommended_number")
+        if isinstance(recommended, str) and recommended.strip().isdigit():
+            recommended = int(recommended.strip())
+        result["top_n_judgment"] = {
+            "result": str(judgment.get("result") or "부분 적합(소제목용)").strip(),
+            "recommended_number": recommended if recommended in (3, 5) else None,
+            "type": str(judgment.get("type") or "정보형").strip(),
+            "reason": str(judgment.get("reason") or "원문 확인 후 TOP N 적용 여부를 판단하세요.").strip(),
+        }
     if len(result.get("headline_options", [])) < 30:
         existing = result.get("headline_options", [])
+        existing_meta = result.setdefault("headline_metadata", [])
         for item in fallback_headlines(topic, label):
             if item not in existing:
                 existing.append(item)
+                existing_meta.append({
+                    "title": item,
+                    "frame": "정보형",
+                    "source_article_ids": [],
+                    "evidence_status": "원문 확인 필요",
+                })
             if len(existing) >= 30:
                 break
         result["headline_options"] = existing[:30]
+        result["headline_metadata"] = existing_meta[:30]
     for field in ("lead", "verification_note"):
         if isinstance(value.get(field), str) and value[field].strip():
             result[field] = value[field].strip()
@@ -276,6 +367,7 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
 
 아래는 오늘 '{label}' 분야에 올라온 기사 목록이다.
 이 분야의 편집 방향은 다음과 같다: {focus}
+이 분야에서 검색어트렌드로 확인된 관심 키워드는 다음과 같다: {trend_context}
 같은 사건이나 흐름을 다루면서도 서로 다른 정보가 있는 기사 {per}개를 한 묶음으로 만들어,
 블로그 글로 쓸 주제 {n}개를 골라라.
 
@@ -290,7 +382,13 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
   - "reader_steps": 독자가 따라 할 확인법·체크리스트 3~5개.
   - "practical_points": 독자에게 실익이 있는 포인트 2~4개.
   - "writing_structure": 블로그 글 구성 3~6개.
-  - "headline_options": 홈판 제목 후보 정확히 30개. 후보마다 검색 의도와 각도를 다르게 한다.
+  - "top_n_judgment": TOP N 적합성 판단 객체. "result"는 "적합", "부분 적합(소제목용)", "부적합" 중 하나.
+    "recommended_number"는 3, 5, 또는 null. "type"은 TOP N 유형이나 "뉴스·변경형".
+    기사에 실제로 확인되는 항목이 충분하지 않으면 부적합 또는 부분 적합으로 판단한다.
+  - "headline_options": 홈판 제목 후보 정확히 30개. 각 항목은
+    {{"title":"...","frame":"이득형|위협형|궁금형|비교형|반전형|실행형|뉴스·변경형",
+    "source_article_ids":[0,2],"evidence_status":"확정 팩트 기반|원문 확인 필요"}} 형식.
+    후보마다 검색 의도와 각도를 다르게 한다.
   - "keywords": 검색 키워드 3~6개.
   - "internal_link_ideas": 연결하면 좋은 글 아이디어 1~3개.
   - "cautions": 단정하면 안 되는 내용이나 확인 주의사항.
@@ -307,6 +405,11 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
 - 형용사 대신 숫자를 쓴다.
 - 확인되지 않은 건강·연예인 소문을 사실처럼 쓰지 않는다.
 - 건강 기사는 진단이나 치료 조언으로 확장하지 않는다.
+- 건강 제목은 질병을 진단하는 것처럼 단정하지 말고 "겹칠 수 있는 신호", "확인할 증상"처럼 쓴다.
+- 경제·정책·리콜 제목은 대상·시행일·조건이 확인되지 않으면 숫자와 범위를 제목에 넣지 않는다.
+- "이 번호", "이 돈", "이것"처럼 가린 표현은 브리프 안에 실제 답이 있을 때만 사용한다.
+- 숫자만으로 대조 항목이 부족하면 TOP N을 쓰지 않는다.
+- 뉴스·정책·리콜은 필요하면 TOP N 대신 뉴스·변경형 제목을 우선한다.
 - 아래 '이미 쓴 글' 및 '이번 실행에서 이미 고른 주제'와 겹치면 고르지 않는다.
 - 광고성 기사, 단순 인사·행사 기사는 제외한다.
 
@@ -331,7 +434,7 @@ def extract_json_array(text):
     return value
 
 
-def ask_llm(label, articles, n, per, past_titles, min_sources, focus=""):
+def ask_llm(label, articles, n, per, past_titles, min_sources, focus="", trend_context=""):
     key = os.getenv("OPENROUTER_API_KEY")
     if not key:
         return None
@@ -349,6 +452,7 @@ def ask_llm(label, articles, n, per, past_titles, min_sources, focus=""):
     prompt = PROMPT.format(
         label=label,
         focus=focus or "제공된 기사에서 독자에게 가장 유용한 세부 주제를 찾는다.",
+        trend_context=trend_context or "검색어트렌드 미연결. 검색 키워드를 과장해 추정하지 않는다.",
         title_prompt=load_title_prompt(),
         n=n,
         per=per,
@@ -494,14 +598,12 @@ def fetch_trend_scores(topics):
     if not (cid and secret) or not topics:
         return {}
     groups = []
-    by_id = {}
     for topic in topics[:5]:
         key = str(topic.get("topic_id") or topic.get("topic", ""))[:40]
         keywords = topic_keywords(topic)
         if not keywords:
             continue
         groups.append({"groupName": key, "keywords": keywords})
-        by_id[key] = topic
     if not groups:
         return {}
     today = dt.datetime.now(KST).date()
@@ -535,6 +637,58 @@ def fetch_trend_scores(topics):
     except Exception as exc:
         print(f"  [검색어트렌드 생략] {type(exc).__name__}: {exc}")
         return {}
+
+
+def fetch_keyword_trend_context(queries):
+    """카테고리의 기본 검색어 관심도를 제목 생성 전에 조회한다."""
+    cid, secret = os.getenv("NAVER_CLIENT_ID"), os.getenv("NAVER_CLIENT_SECRET")
+    clean_queries = []
+    for query in queries or []:
+        query = re.sub(r"\s+", " ", str(query or "")).strip()
+        if query and query not in clean_queries:
+            clean_queries.append(query)
+    if not (cid and secret) or not clean_queries:
+        return []
+    groups = [
+        {"groupName": query[:40], "keywords": [query]}
+        for query in clean_queries[:5]
+    ]
+    today = dt.datetime.now(KST).date()
+    try:
+        res = requests.post(
+            TREND_URL,
+            headers={
+                "X-NCP-APIGW-API-KEY-ID": cid,
+                "X-NCP-APIGW-API-KEY": secret,
+                "Content-Type": "application/json",
+            },
+            json={
+                "startDate": (today - dt.timedelta(days=30)).isoformat(),
+                "endDate": today.isoformat(),
+                "timeUnit": "date",
+                "keywordGroups": groups,
+            },
+            timeout=20,
+        )
+        res.raise_for_status()
+        values = []
+        for result in res.json().get("results", []):
+            ratios = [float(item.get("ratio", 0)) for item in (result.get("data") or [])[-7:]]
+            if ratios:
+                values.append({
+                    "keyword": result.get("title", ""),
+                    "score": round(sum(ratios) / len(ratios), 1),
+                })
+        return sorted(values, key=lambda item: item["score"], reverse=True)
+    except Exception as exc:
+        print(f"  [카테고리 검색어트렌드 생략] {type(exc).__name__}: {exc}")
+        return []
+
+
+def format_trend_context(values):
+    if not values:
+        return "검색어트렌드 자료 없음"
+    return ", ".join(f'{item["keyword"]}({item["score"]})' for item in values)
 
 
 def fallback_interest_score(topic):
@@ -670,13 +824,13 @@ def enrich_blog_similarity(topics):
     return topics
 
 
-def build(label, articles, n, per, min_sources, past_titles, excluded_links=(), focus=""):
+def build(label, articles, n, per, min_sources, past_titles, excluded_links=(), focus="", trend_context=""):
     excluded = set(excluded_links)
     articles = [a for a in articles if a.get("link") not in excluded]
     if len(articles) < per:
         return []
     blocked = set(excluded)
-    topics = ask_llm(label, articles, n, per, past_titles, min_sources, focus)
+    topics = ask_llm(label, articles, n, per, past_titles, min_sources, focus, trend_context)
     if topics is None:
         topics = naive_cluster(articles, n * 3, per, min_sources, label=label)
     topics = [t for t in topics if usable_topic(t, per, min_sources)]
@@ -715,6 +869,8 @@ def main():
         n = category_cfg.get("topics_per_category", global_n)
         per = category_cfg.get("articles_per_topic", global_per)
         min_sources = category_cfg.get("min_unique_sources_per_topic", global_min_sources)
+        trend_values = fetch_keyword_trend_context(category_cfg.get("naver_queries", []))
+        trend_context = format_trend_context(trend_values)
         available = [a for a in block["articles"] if a.get("link") not in selected_links]
         print(f"[{block['label']}] 기사 {len(available)}건")
         topics = build(
@@ -726,6 +882,7 @@ def main():
             past_titles + selected_titles,
             selected_links,
             category_cfg.get("focus", ""),
+            trend_context,
         )
         topics = enrich_blog_similarity(rank_topics(topics))
         selected_links.update(a.get("link") for t in topics for a in t["articles"] if a.get("link"))
@@ -736,6 +893,7 @@ def main():
             "label": block["label"],
             "blog": block.get("blog"),
             "category_name": block.get("category_name"),
+            "trend_summary": trend_values,
             "articles_per_topic": per,
             "topics": topics,
         }
@@ -757,6 +915,7 @@ def main():
                 past_titles + selected_titles,
                 selected_links,
                 celeb_cfg.get("focus", "연예인의 건강 공개·회복·생활 습관 관련 이슈"),
+                trend_context,
             )
             out["celeb_topics"] = enrich_blog_similarity(rank_topics(out["celeb_topics"]))
             selected_links.update(

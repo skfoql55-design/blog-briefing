@@ -69,6 +69,7 @@ section.cat{margin-bottom:38px}
 .complete-toggle{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.78rem;cursor:pointer;user-select:none}
 .complete-toggle input{width:16px;height:16px;accent-color:#3b8f5b;cursor:pointer}
 .complete-note{color:var(--muted);font-size:.72rem}
+.trend-summary{color:var(--muted);font-size:.75rem;margin:4px 0 0 19px}
 .checkbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin:0 0 18px;font-size:.8rem;color:var(--muted)}
 .checkbar strong{color:var(--ink)}
@@ -118,6 +119,7 @@ footer a{color:var(--muted)}
 .headline-option:has(input:checked){border-color:#3b8f5b;box-shadow:0 0 0 1px #3b8f5b inset}
 .headline-option input{margin-top:4px;accent-color:#3b8f5b}
 .headline-option span{font-size:.83rem;line-height:1.45}
+.frame-tag{display:inline-block;margin-right:6px;color:var(--muted);font-size:.7rem;background:var(--chip);border-radius:99px;padding:1px 6px}
 .headline-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
 .headline-actions button{border:1px solid var(--line);background:var(--chip);color:var(--muted);border-radius:7px;padding:6px 10px;cursor:pointer}
 .headline-actions button:hover{color:var(--ink)}
@@ -133,6 +135,8 @@ footer a{color:var(--muted)}
 .similarity-row p{font-size:.78rem;color:var(--muted);margin:8px 0 0}
 .similarity-row a{color:var(--ink)}
 .method-note{color:var(--muted);font-size:.78rem;margin:0 0 10px}
+.judgment{background:var(--chip);border-radius:9px;padding:10px 12px;font-size:.82rem;margin-bottom:10px}
+.judgment strong{margin-right:5px}
 .back{margin-bottom:16px;font-size:.82rem}
 .back a{color:var(--muted);text-decoration:none}
 """
@@ -260,12 +264,15 @@ def interest_badge(topic):
     return f'<span class="interest-badge">관심도 {esc(score)} · {method}</span>'
 
 
-def render_headline_picker(headlines, page_id):
+def render_headline_picker(headlines, page_id, metadata=None):
+    metadata = {item.get("title"): item for item in (metadata or []) if isinstance(item, dict)}
     options = []
     for index, headline in enumerate(headlines[:30], 1):
+        meta = metadata.get(headline, {})
+        frame = f'<span class="frame-tag">{esc(meta.get("frame") or "정보형")}</span>'
         options.append(
             f'<label class="headline-option"><input type="radio" name="headline" '
-            f'value="{esc(headline)}"><span>{index:02d}. {esc(headline)}</span></label>'
+            f'value="{esc(headline)}"><span>{index:02d}. {frame}{esc(headline)}</span></label>'
         )
     return f'''<div data-title-picker>
 <div class="headline-actions"><button type="button" data-copy-title>선택 제목 복사</button>
@@ -315,6 +322,20 @@ def render_similarity(topic):
     )
 
 
+def render_top_n_judgment(topic):
+    judgment = (topic.get("landing") or {}).get("top_n_judgment") or {}
+    if not judgment:
+        return ""
+    result = judgment.get("result") or "확인 필요"
+    number = judgment.get("recommended_number")
+    number_text = f"TOP{number}" if number else "해당 없음"
+    return (
+        f'<div class="judgment"><strong>TOP N 판단</strong>'
+        f'{esc(result)} · 권장 숫자: {esc(number_text)} · 유형: {esc(judgment.get("type") or "정보형")}<br>'
+        f'<span>{esc(judgment.get("reason") or "원문 확인 후 판단하세요.")}</span></div>'
+    )
+
+
 def render_topic(idx, topic, detail_href=None, check_id=None):
     arts = "".join(
         f'<li><a href="{safe_href(article.get("link"))}" target="_blank" rel="noopener">'
@@ -356,6 +377,7 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
     practical = landing_value(topic, "practical_points", [])
     structure = landing_value(topic, "writing_structure", [])
     headlines = landing_value(topic, "headline_options", [topic.get("topic", "")])
+    headline_metadata = landing.get("headline_metadata") or []
     keywords = landing_value(topic, "keywords", [topic.get("topic", "")])
     internal = landing_value(topic, "internal_link_ideas", [])
     cautions = landing_value(topic, "cautions", [])
@@ -403,7 +425,8 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
 <section class="detail-section"><h3>블로그 글 구성안</h3>{render_list(structure, ordered=True)}</section>
 <section class="detail-section"><h3>홈판 제목 추천 30개</h3>
 <p class="method-note">제목을 하나 선택한 뒤 복사해서 블로그 초안에 사용하세요.</p>
-{render_headline_picker(headlines, page_id)}</section>
+{render_top_n_judgment(topic)}
+{render_headline_picker(headlines, page_id, headline_metadata)}</section>
 <section class="detail-section"><h3>네이버 블로그 제목 유사도 조사</h3>
 <p class="method-note">네이버 블로그 검색 결과 제목과 비교한 참고용 추정치입니다. 실제 검색 노출 순위나 표절 여부를 확정하는 값은 아닙니다.</p>
 {render_similarity(topic)}</section>
@@ -422,6 +445,13 @@ def render_day(brief, prev_date=None, next_date=None):
         meta = esc(category.get("category_name") or "")
         if category.get("blog"):
             meta += f' · blog.naver.com/{esc(category["blog"])}'
+        trend_summary = category.get("trend_summary") or []
+        if trend_summary:
+            trend_text = " · ".join(
+                f'{esc(item.get("keyword"))} {esc(item.get("score"))}'
+                for item in trend_summary[:5]
+            )
+            meta += f'<div class="trend-summary">검색 관심 키워드: {trend_text}</div>'
         parts = [
             f'<section class="cat"><div class="cathead">'
             f'<span class="dot" style="background:{color}"></span>'
