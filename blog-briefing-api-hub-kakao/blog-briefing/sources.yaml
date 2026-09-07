@@ -1,0 +1,118 @@
+# ─────────────────────────────────────────────────────────────
+# 자료 소스 설정
+# 피드 주소가 바뀌면 여기만 고치면 됩니다.
+# 처음 한 번 `python scripts/verify_sources.py` 를 돌려서
+# 죽은 피드를 확인하고 지우거나 교체하세요.
+# ─────────────────────────────────────────────────────────────
+
+# 몇 시간 이내 기사만 최신으로 볼지
+freshness_hours: 30
+
+# 카테고리별 목표 주제 수
+topics_per_category: 5
+
+# 한 주제에 묶을 관련 기사 수. 각 주제는 이 수만큼 기사 근거가 있어야 선정합니다.
+articles_per_topic: 3
+
+# 한 주제에 필요한 최소 출처 도메인 수
+min_unique_sources_per_topic: 3
+
+categories:
+  economy:
+    label: "경제"
+    blog: "manneungtem"
+    category_name: "오늘의 경제노트"
+    rss:
+      - https://www.hankyung.com/feed/economy
+      - https://www.hankyung.com/feed/finance
+      - https://www.mk.co.kr/rss/30100041/          # 매경 경제
+      - https://www.mk.co.kr/rss/50100032/          # 매경 증권
+      - https://biz.chosun.com/arc/outboundfeeds/rss/?outputType=xml
+      - https://news.mt.co.kr/rss/economy.xml
+      - https://rss.hankyung.com/feed/economy.xml
+    naver_queries:
+      - "기준금리"
+      - "환율"
+      - "물가"
+      - "부동산 정책"
+      - "코스피"
+
+  health:
+    label: "건강"
+    blog: "somimom0511"
+    category_name: "건강 노트 리뷰"
+    topics_per_category: 5
+    rss:
+      - https://kormedi.com/feed/
+      - https://www.hidoc.co.kr/rss/news
+      - https://www.docdocdoc.co.kr/rss/allArticle.xml
+      - https://www.medicaltimes.com/rss/allArticle.xml
+      - https://www.kdca.go.kr/board/rss.es?mid=a20501000000&bid=0015   # 질병관리청 보도자료
+    naver_queries:
+      - "건강 연구 결과"
+      - "질병관리청"
+      - "식약처 발표"
+    # 연예인 관련 건강 이슈 (조회수용 별도 섹션)
+    celeb:
+      count: 3
+      articles_per_topic: 3
+      min_unique_sources_per_topic: 3
+      naver_queries:
+        - "연예인 건강"
+        - "배우 투병"
+        - "가수 건강 이상"
+        - "연예인 다이어트"
+        - "스타 수술 고백"
+
+  cartech:
+    label: "카테크"
+    blog: "carandtech"
+    category_name: "전체보기"
+    rss:
+      - https://rss.etnews.com/Section901.xml       # 전자신문 IT
+      - https://rss.etnews.com/Section902.xml       # 전자신문 자동차
+      - https://zdnet.co.kr/news/news_xml.asp
+      - https://www.ddaily.co.kr/news_rss.php
+      - https://www.motorgraph.com/rss/allArticle.xml
+      - https://www.itworld.co.kr/rss/all.xml
+    naver_queries:
+      - "전기차 신차"
+      - "스마트폰 신제품"
+      - "자동차 리콜"
+      - "AI 기기"
+
+  broadcast:
+    label: "방송연예"
+    blog: ""
+    category_name: "오늘의 방송연예 브리핑"
+    topics_per_category: 5
+    rss:
+      - https://www.newsis.com/RSS/entertain.xml
+      - https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=14&plink=RSSREADER
+      - https://www.yonhapnewstv.co.kr/category/news/culture/feed/
+    naver_queries:
+      - "방송연예 최신"
+      - "드라마 화제"
+      - "예능 화제"
+      - "OTT 신작"
+      - "배우 가수 컴백"
+
+  sports:
+    label: "스포츠"
+    blog: ""
+    category_name: "오늘의 스포츠 브리핑"
+    topics_per_category: 5
+    rss:
+      - https://www.newsis.com/RSS/sports.xml
+      - https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=09&plink=RSSREADER
+      - https://www.yonhapnewstv.co.kr/category/news/sports/feed/
+    naver_queries:
+      - "스포츠 최신"
+      - "프로야구"
+      - "프로축구"
+      - "해외축구"
+      - "골프 테니스 배구"
+
+# 이미 쓴 글 제목 — 중복 회피용.
+# 프로젝트 루트의 past_titles.txt 에 한 줄에 하나씩 붙여넣으세요.
+past_titles_file: past_titles.txt
