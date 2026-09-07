@@ -1,9 +1,9 @@
 """
 4단계 — 카카오톡 '나에게 보내기'
-오늘 브리핑 링크와 주제 미리보기를 카톡으로 보낸다.
+오늘 브리핑 안내문과 확인 링크를 카톡으로 보낸다.
 
 핵심 주의점 (카카오 API 특성):
-- 텍스트 템플릿 본문은 200자 제한 → 카테고리별로 나눠 보낸다
+- 텍스트 템플릿 본문은 200자 제한 → 짧은 안내문 1통만 보낸다
 - access token 6시간 / refresh token 2개월
 - refresh token 은 남은 기간이 30일 이하일 때만 응답에 새로 내려온다.
   무조건 덮어쓰면 토큰을 잃으므로 '있을 때만' 갱신한다.
@@ -95,24 +95,12 @@ def main():
     day_url = f"{site}/{date}.html"
 
     token = refresh_access_token()
-    d = dt.datetime.strptime(date, "%Y-%m-%d")
-    head = f'{d.month}월 {d.day}일 브리핑이 준비됐어요.\n'
-
-    # 1통: 전체 요약
-    counts = " / ".join(f'{c["label"]} {len(c["topics"])}'
-                        for c in brief["categories"].values())
-    all_ok = send_text(token, head + f"오늘 주제 {counts}\n아래 버튼으로 전체 보기", day_url)
-
-    # 2통~: 카테고리별 주제 목록
-    for cat in brief["categories"].values():
-        if not cat["topics"]:
-            continue
-        lines = [f'[{cat["label"]}]']
-        for i, t in enumerate(cat["topics"], 1):
-            lines.append(f'{i}. {t["topic"]}')
-        if cat.get("celeb_topics"):
-            lines.append(f'+ 연예인 이슈 {len(cat["celeb_topics"])}건')
-        all_ok = send_text(token, "\n".join(lines), day_url) and all_ok
+    message = (
+        "오늘의 브리핑 소식 보내드립니다.\n\n"
+        "아래 링크에서 확인해주세요.\n"
+        f"{day_url}"
+    )
+    all_ok = send_text(token, message, day_url)
 
     if not all_ok:
         print("카카오톡 메시지 중 하나 이상 전송되지 않았습니다.")
