@@ -9,7 +9,7 @@ import hashlib
 import json
 import os
 import re
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 KST = dt.timezone(dt.timedelta(hours=9))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -62,6 +62,7 @@ section.cat{margin-bottom:38px}
 .topic.completed{border-color:#76a987;background:linear-gradient(90deg,var(--card),rgba(118,169,135,.08))}
 .topic.completed .ttitle{color:var(--muted)}
 .tnum{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.interest-badge{display:inline-block;margin-left:7px;background:var(--chip);border-radius:99px;padding:2px 7px;color:var(--muted);font-size:.68rem;font-weight:500;vertical-align:1px}
 .ttitle{font-size:1rem;font-weight:600;margin:3px 0 6px;letter-spacing:-.01em}
 .tbasis{font-size:.87rem;color:var(--muted);margin:0 0 11px}
 .topic-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 7px}
@@ -112,6 +113,26 @@ footer a{color:var(--muted)}
 .source-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
 .source-card a{color:var(--ink);font-weight:600;text-decoration:none}
 .source-card p{font-size:.82rem;color:var(--muted);margin:6px 0 0}
+.headline-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.headline-option{display:flex;gap:8px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;cursor:pointer}
+.headline-option:has(input:checked){border-color:#3b8f5b;box-shadow:0 0 0 1px #3b8f5b inset}
+.headline-option input{margin-top:4px;accent-color:#3b8f5b}
+.headline-option span{font-size:.83rem;line-height:1.45}
+.headline-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.headline-actions button{border:1px solid var(--line);background:var(--chip);color:var(--muted);border-radius:7px;padding:6px 10px;cursor:pointer}
+.headline-actions button:hover{color:var(--ink)}
+.selected-headline{color:var(--muted);font-size:.8rem}
+.similarity-list{display:grid;gap:7px}
+.similarity-row{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+.similarity-row.high{border-color:#e09a87;background:#fff8f5}
+.similarity-row.low{border-color:#8bb99a}
+@media (prefers-color-scheme:dark){.similarity-row.high{background:#2b211d}.similarity-row.low{background:#1b2920}}
+.similarity-row summary{cursor:pointer;display:flex;justify-content:space-between;gap:10px;list-style:none;font-size:.83rem}
+.similarity-row summary::-webkit-details-marker{display:none}
+.similarity-score{white-space:nowrap;color:var(--muted);font-size:.75rem}
+.similarity-row p{font-size:.78rem;color:var(--muted);margin:8px 0 0}
+.similarity-row a{color:var(--ink)}
+.method-note{color:var(--muted);font-size:.78rem;margin:0 0 10px}
 .back{margin-bottom:16px;font-size:.82rem}
 .back a{color:var(--muted);text-decoration:none}
 """
@@ -157,6 +178,24 @@ CHECK_SCRIPT = """<script>
       document.querySelectorAll('.topic-check').forEach((input) => delete saved[input.dataset.topicId]);
       write(saved);
       refresh();
+    });
+  });
+  document.querySelectorAll('[data-title-picker]').forEach((picker) => {
+    const selected = picker.querySelector('[data-selected-title]');
+    const copyButton = picker.querySelector('[data-copy-title]');
+    const inputs = picker.querySelectorAll('input[name="headline"]');
+    inputs.forEach((input) => input.addEventListener('change', () => {
+      if (selected) selected.textContent = input.value;
+    }));
+    if (copyButton) copyButton.addEventListener('click', async () => {
+      const input = picker.querySelector('input[name="headline"]:checked');
+      if (!input) { if (selected) selected.textContent = '먼저 제목을 선택하세요.'; return; }
+      try {
+        await navigator.clipboard.writeText(input.value);
+        if (selected) selected.textContent = '복사 완료: ' + input.value;
+      } catch (_) {
+        if (selected) selected.textContent = '복사할 제목: ' + input.value;
+      }
     });
   });
   refresh();
@@ -212,6 +251,70 @@ def render_list(items, ordered=False):
     return f"<{tag}>" + "".join(f"<li>{esc(item)}</li>" for item in items) + f"</{tag}>"
 
 
+def interest_badge(topic):
+    interest = topic.get("interest") or {}
+    score = interest.get("score")
+    if score is None:
+        return ""
+    method = "검색 트렌드" if "NAVER" in str(interest.get("method", "")) else "기사 기반"
+    return f'<span class="interest-badge">관심도 {esc(score)} · {method}</span>'
+
+
+def render_headline_picker(headlines, page_id):
+    options = []
+    for index, headline in enumerate(headlines[:30], 1):
+        options.append(
+            f'<label class="headline-option"><input type="radio" name="headline" '
+            f'value="{esc(headline)}"><span>{index:02d}. {esc(headline)}</span></label>'
+        )
+    return f'''<div data-title-picker>
+<div class="headline-actions"><button type="button" data-copy-title>선택 제목 복사</button>
+<span class="selected-headline" data-selected-title>제목을 하나 선택하세요.</span></div>
+<div class="headline-grid">{"".join(options)}</div></div>'''
+
+
+def naver_blog_search_url(query):
+    return f"https://search.naver.com/search.naver?where=blog&query={quote(str(query or ''))}"
+
+
+def render_similarity(topic):
+    similarity = topic.get("naver_blog_similarity") or {}
+    status = similarity.get("status")
+    query = similarity.get("query") or topic.get("topic", "")
+    if status != "ok":
+        note = similarity.get("note") or "네이버 블로그 검색 결과를 아직 확인하지 못했습니다."
+        return (
+            f'<p class="method-note">{esc(note)} '
+            f'<a href="{esc(naver_blog_search_url(query))}" target="_blank" rel="noopener">'
+            f'네이버 블로그에서 직접 검색 →</a></p>'
+        )
+    candidates = similarity.get("candidates") or []
+    if not candidates:
+        return f'<p class="method-note">{esc(similarity.get("note"))}</p>'
+    rows = []
+    for candidate in candidates:
+        score = float(candidate.get("score") or 0)
+        level = "high" if score >= 70 else ("low" if score < 45 else "")
+        match = candidate.get("match") or {}
+        match_title = match.get("title") or "유사 제목을 찾지 못했습니다."
+        match_link = safe_href(match.get("link"))
+        match_html = (
+            f'<a href="{match_link}" target="_blank" rel="noopener">{esc(match_title)}</a>'
+            if match.get("link") else esc(match_title)
+        )
+        rows.append(
+            f'<details class="similarity-row {level}"><summary>'
+            f'<span>{esc(candidate.get("title"))}</span>'
+            f'<span class="similarity-score">유사도 추정 {score:.1f}%</span></summary>'
+            f'<p>가장 가까운 검색 결과: {match_html}</p></details>'
+        )
+    return (
+        f'<p class="method-note">{esc(similarity.get("note"))} '
+        f'(검색 결과 {esc(similarity.get("checked_count", 0))}개 비교)</p>'
+        f'<div class="similarity-list">{"".join(rows)}</div>'
+    )
+
+
 def render_topic(idx, topic, detail_href=None, check_id=None):
     arts = "".join(
         f'<li><a href="{safe_href(article.get("link"))}" target="_blank" rel="noopener">'
@@ -223,7 +326,7 @@ def render_topic(idx, topic, detail_href=None, check_id=None):
     detail = f'<a class="detail-link" href="{esc(detail_href)}">상세 조사 정리 →</a>' if detail_href else ""
     check = render_completion_control(check_id) if check_id else ""
     return f"""<article class="topic">
-<div class="tnum">{idx:02d}</div>
+<div class="tnum">{idx:02d}{interest_badge(topic)}</div>
 {check}
 <div class="ttitle">{esc(topic.get("topic"))}</div>
 <p class="tbasis">{esc(topic.get("basis"))}</p>
@@ -290,7 +393,7 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
 <title>{esc(topic.get("topic"))} | 블로그 브리핑</title>
 <style>{CSS}</style></head><body><div class="wrap">
 <div class="back"><a href="../{esc(date)}.html">← {date_label(date)} 브리핑으로 돌아가기</a></div>
-<div class="hero"><div class="date">{esc(category.get("label"))} · {esc(section)}</div>
+<div class="hero"><div class="date">{esc(category.get("label"))} · {esc(section)} {interest_badge(topic)}</div>
 {completion}<h2>{esc(topic.get("topic"))}</h2><p>{esc(lead)}</p>{warning}</div>
 <section class="detail-section"><h3>핵심 팩트</h3>{render_list(facts)}</section>
 <section class="detail-section"><h3>독자용 확인법·체크리스트</h3>{render_list(steps, ordered=True)}</section>
@@ -298,7 +401,12 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
 {caution_block}
 <section class="detail-section"><h3>관련 기사 3개</h3><div class="sources">{"".join(source_cards)}</div></section>
 <section class="detail-section"><h3>블로그 글 구성안</h3>{render_list(structure, ordered=True)}</section>
-<section class="detail-section"><h3>제목 후보</h3>{render_list(headlines)}</section>
+<section class="detail-section"><h3>홈판 제목 추천 30개</h3>
+<p class="method-note">제목을 하나 선택한 뒤 복사해서 블로그 초안에 사용하세요.</p>
+{render_headline_picker(headlines, page_id)}</section>
+<section class="detail-section"><h3>네이버 블로그 제목 유사도 조사</h3>
+<p class="method-note">네이버 블로그 검색 결과 제목과 비교한 참고용 추정치입니다. 실제 검색 노출 순위나 표절 여부를 확정하는 값은 아닙니다.</p>
+{render_similarity(topic)}</section>
 <section class="detail-section"><h3>검색 키워드</h3><div class="chips">{"".join(f'<span class="chip">{esc(item)}</span>' for item in keywords)}</div></section>
 {internal_block}
 <footer>기사 원문을 확인한 뒤 미확정 정보와 수치를 보완해 발행하세요.<br>

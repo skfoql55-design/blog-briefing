@@ -13,9 +13,11 @@ OPENROUTER_API_KEY 가 없거나 LLM 응답이 검증에 실패하면
 """
 import datetime as dt
 import hashlib
+import html
 import json
 import os
 import re
+from difflib import SequenceMatcher
 from urllib.parse import urlparse
 
 import requests
@@ -25,9 +27,67 @@ KST = dt.timezone(dt.timedelta(hours=9))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL = os.getenv("OPENROUTER_MODEL", "z-ai/glm-5.3-flash")
 MAX_HEADLINES = 60
+TREND_URL = "https://naverapihub.apigw.ntruss.com/search-trend/v1/search"
+BLOG_URL = "https://naverapihub.apigw.ntruss.com/search/v1/blog"
+TITLE_PROMPT_FILE = os.path.join(ROOT, "prompts", "home_title_prompt.txt")
+BLOG_API_AVAILABLE = None
 
 STOP = set("""기자 뉴스 종합 속보 단독 오늘 내일 올해 지난 대한 위해 관련 대해 통해 있다 없다
 그리고 하지만 이번 지난해 우리 국내 이날 대비 중인 것으로 밝혔다 전했다 나타났다""".split())
+
+
+def load_title_prompt():
+    """사용자가 교체할 수 있는 홈판 제목 생성 프롬프트를 읽는다."""
+    if os.path.exists(TITLE_PROMPT_FILE):
+        try:
+            text = open(TITLE_PROMPT_FILE, encoding="utf-8").read().strip()
+            if text:
+                return text
+        except OSError:
+            pass
+    return (
+        "사실을 과장하거나 확인되지 않은 숫자를 만들지 말고, 검색자가 궁금해할 질문형·혜택형·"
+        "확인형 제목을 섞어 정확히 30개 만든다. 제목끼리 표현과 각도를 반복하지 않는다. "
+        "홈판용이므로 짧고 자연스러운 한국어로 쓴다."
+    )
+
+
+def fallback_headlines(topic, label=""):
+    """LLM을 사용할 수 없을 때도 30개 제목 후보를 제공한다."""
+    templates = [
+        f"{topic}, 지금 확인해야 할 핵심 3가지",
+        f"{topic} 한눈에 정리… 놓치기 쉬운 포인트는",
+        f"{topic} 관련 소식, 달라지는 점을 쉽게 정리했습니다",
+        f"{topic} 사실과 오해를 구분해 봤습니다",
+        f"{topic} 기사 3개를 비교해 보니 공통점은",
+        f"{topic} 발표 내용, 내 생활에 미치는 영향은",
+        f"{topic} 대상이라면 먼저 확인할 내용",
+        f"{topic} 오늘 나온 소식에서 꼭 봐야 할 부분",
+        f"{topic} 언제부터 적용될까? 일정과 대상 정리",
+        f"{topic} 핵심 내용만 1분 만에 확인하기",
+        f"{topic} 숫자로 정리한 변화와 영향",
+        f"{topic} 지금 검색하는 사람이 많은 이유",
+        f"{topic} 직접 확인하는 방법과 주의점",
+        f"{topic} 내 경우에도 해당되는지 확인해 보세요",
+        f"{topic} 전문가들이 공통으로 짚은 내용",
+        f"{topic} 달라지는 기준과 확인할 서류",
+        f"{topic} 실제로 도움이 되는 체크리스트",
+        f"{topic} 잘못 알려진 정보는 무엇일까",
+        f"{topic} 오늘의 이슈를 독자 관점에서 정리",
+        f"{topic} 기사마다 달랐던 내용까지 비교했습니다",
+        f"{topic} 알아두면 손해를 줄일 수 있는 정보",
+        f"{topic} 시작 전에 확인할 5가지",
+        f"{topic} 지금 알아야 할 변화와 다음 일정",
+        f"{topic} 초보자도 이해하기 쉽게 정리",
+        f"{topic} 중요한 내용만 골라서 확인하세요",
+        f"{topic} 관련 공식 발표와 보도 내용 비교",
+        f"{topic} 궁금했던 내용을 질문과 답으로 정리",
+        f"{topic} 실제 적용 전 꼭 확인할 조건",
+        f"{topic} 검색 전 알아두면 좋은 핵심 용어",
+        f"{topic} 오늘의 브리핑: 사실·영향·확인법",
+    ]
+    seen = set()
+    return [item for item in templates if not (item in seen or seen.add(item))][:30]
 
 
 def stems(title):
@@ -93,7 +153,7 @@ def default_landing(label, topic, basis, articles):
             "추가 확인: 기사별로 다른 수치·일정·영향",
             "독자용 체크리스트와 마무리",
         ],
-        "headline_options": [topic, f"{topic} 확인 포인트"],
+        "headline_options": fallback_headlines(topic, label),
         "keywords": [topic],
         "internal_link_ideas": [],
         "cautions": cautions,
@@ -114,7 +174,15 @@ def normalize_landing(label, topic, basis, articles, value):
         if isinstance(items, list):
             clean = [str(item).strip() for item in items if str(item).strip()]
             if clean:
-                result[field] = clean[:8]
+                result[field] = clean[:30 if field == "headline_options" else 8]
+    if len(result.get("headline_options", [])) < 30:
+        existing = result.get("headline_options", [])
+        for item in fallback_headlines(topic, label):
+            if item not in existing:
+                existing.append(item)
+            if len(existing) >= 30:
+                break
+        result["headline_options"] = existing[:30]
     for field in ("lead", "verification_note"):
         if isinstance(value.get(field), str) and value[field].strip():
             result[field] = value[field].strip()
@@ -222,7 +290,7 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
   - "reader_steps": 독자가 따라 할 확인법·체크리스트 3~5개.
   - "practical_points": 독자에게 실익이 있는 포인트 2~4개.
   - "writing_structure": 블로그 글 구성 3~6개.
-  - "headline_options": 제목 후보 2~3개.
+  - "headline_options": 홈판 제목 후보 정확히 30개. 후보마다 검색 의도와 각도를 다르게 한다.
   - "keywords": 검색 키워드 3~6개.
   - "internal_link_ideas": 연결하면 좋은 글 아이디어 1~3개.
   - "cautions": 단정하면 안 되는 내용이나 확인 주의사항.
@@ -241,6 +309,9 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
 - 건강 기사는 진단이나 치료 조언으로 확장하지 않는다.
 - 아래 '이미 쓴 글' 및 '이번 실행에서 이미 고른 주제'와 겹치면 고르지 않는다.
 - 광고성 기사, 단순 인사·행사 기사는 제외한다.
+
+[홈판 제목 생성 지침]
+{title_prompt}
 
 {past_block}
 [오늘 기사]
@@ -278,6 +349,7 @@ def ask_llm(label, articles, n, per, past_titles, min_sources, focus=""):
     prompt = PROMPT.format(
         label=label,
         focus=focus or "제공된 기사에서 독자에게 가장 유용한 세부 주제를 찾는다.",
+        title_prompt=load_title_prompt(),
         n=n,
         per=per,
         past_block=past_block,
@@ -400,6 +472,204 @@ def fill_up(topics, articles, n, per, min_sources, blocked=()):
     return topics + extra
 
 
+def topic_keywords(topic):
+    """검색어트렌드와 블로그 검색에 사용할 주제별 검색어를 정리한다."""
+    values = [topic.get("topic", "")]
+    values.extend((topic.get("landing") or {}).get("keywords", []))
+    out = []
+    for value in values:
+        value = re.sub(r"\s+", " ", str(value or "")).strip()
+        if value and value not in out:
+            out.append(value)
+    return out[:20]
+
+
+def fetch_trend_scores(topics):
+    """NAVER DataLab 상대 검색지수를 주제별로 가져온다.
+
+    Search Trend API는 한 번에 주제어 5개까지 비교할 수 있어 카테고리 단위로 호출한다.
+    API를 신청하지 않았거나 호출에 실패하면 빈 결과를 반환해 휴리스틱으로 대체한다.
+    """
+    cid, secret = os.getenv("NAVER_CLIENT_ID"), os.getenv("NAVER_CLIENT_SECRET")
+    if not (cid and secret) or not topics:
+        return {}
+    groups = []
+    by_id = {}
+    for topic in topics[:5]:
+        key = str(topic.get("topic_id") or topic.get("topic", ""))[:40]
+        keywords = topic_keywords(topic)
+        if not keywords:
+            continue
+        groups.append({"groupName": key, "keywords": keywords})
+        by_id[key] = topic
+    if not groups:
+        return {}
+    today = dt.datetime.now(KST).date()
+    body = {
+        "startDate": (today - dt.timedelta(days=30)).isoformat(),
+        "endDate": today.isoformat(),
+        "timeUnit": "date",
+        "keywordGroups": groups,
+    }
+    try:
+        res = requests.post(
+            TREND_URL,
+            headers={
+                "X-NCP-APIGW-API-KEY-ID": cid,
+                "X-NCP-APIGW-API-KEY": secret,
+                "Content-Type": "application/json",
+            },
+            json=body,
+            timeout=20,
+        )
+        res.raise_for_status()
+        scores = {}
+        for result in res.json().get("results", []):
+            data = result.get("data") or []
+            ratios = [float(item.get("ratio", 0)) for item in data[-7:] if item.get("ratio") is not None]
+            if ratios:
+                scores[result.get("title", "")] = round(sum(ratios) / len(ratios), 1)
+        if scores:
+            print(f"  네이버 검색어트렌드 비교 완료 - {len(scores)}개 주제")
+        return scores
+    except Exception as exc:
+        print(f"  [검색어트렌드 생략] {type(exc).__name__}: {exc}")
+        return {}
+
+
+def fallback_interest_score(topic):
+    """검색어트렌드가 없을 때 기사 최신성·출처 확산으로 관심도를 추정한다."""
+    now = dt.datetime.now(KST)
+    recencies = []
+    for article in topic.get("articles", []):
+        try:
+            published = dt.datetime.fromisoformat(str(article.get("published")))
+            if published.tzinfo is None:
+                published = published.replace(tzinfo=KST)
+            hours = max(0.0, (now - published.astimezone(KST)).total_seconds() / 3600)
+            recencies.append(max(0.0, 1.0 - min(hours, 72.0) / 72.0))
+        except Exception:
+            pass
+    recency = (sum(recencies) / len(recencies) if recencies else 0.35) * 50
+    sources = len(topic.get("source_domains") or {article_domain(a) for a in topic.get("articles", [])})
+    source_score = min(sources, 3) / 3 * 25
+    keyword_score = min(len(topic_keywords(topic)), 6) / 6 * 15
+    title_score = min(len(stems(topic.get("topic", ""))), 6) / 6 * 10
+    return int(round(recency + source_score + keyword_score + title_score))
+
+
+def rank_topics(topics):
+    """주제를 관심도 높은 순서로 정렬하고 순위·근거를 저장한다."""
+    trend_scores = fetch_trend_scores(topics)
+    for topic in topics:
+        key = str(topic.get("topic_id") or topic.get("topic", ""))[:40]
+        if key in trend_scores:
+            score = trend_scores[key]
+            method = "NAVER 검색어트렌드 상대지수"
+        else:
+            score = fallback_interest_score(topic)
+            method = "기사 최신성·출처 확산 추정"
+        topic["interest"] = {
+            "score": score,
+            "method": method,
+            "keywords": topic_keywords(topic),
+        }
+    topics.sort(key=lambda item: (-item.get("interest", {}).get("score", 0), item.get("topic", "")))
+    for index, topic in enumerate(topics, 1):
+        topic.setdefault("interest", {})["rank"] = index
+    return topics
+
+
+def normalized_title(value):
+    value = html.unescape(re.sub(r"<[^>]+>", "", str(value or ""))).lower()
+    return re.sub(r"[^0-9a-z가-힣]", "", value)
+
+
+def title_similarity(left, right):
+    """블로그 제목 간 단어 형태가 흔들려도 비교할 수 있는 문자 n-gram 유사도."""
+    left = normalized_title(left)
+    right = normalized_title(right)
+    if not left or not right:
+        return 0.0
+    if left == right:
+        return 100.0
+    grams_left = {left[index:index + 2] for index in range(max(1, len(left) - 1))}
+    grams_right = {right[index:index + 2] for index in range(max(1, len(right) - 1))}
+    union = grams_left | grams_right
+    jaccard = len(grams_left & grams_right) / len(union) if union else 0
+    sequence = SequenceMatcher(None, left, right).ratio()
+    return round((jaccard * 0.7 + sequence * 0.3) * 100, 1)
+
+
+def fetch_blog_similarity(topic):
+    """주제당 네이버 블로그 검색 1회로 추천 제목 30개의 유사도를 추정한다."""
+    global BLOG_API_AVAILABLE
+    headlines = ((topic.get("landing") or {}).get("headline_options") or [])[:30]
+    query = str(topic.get("topic", "")).strip()
+    if not headlines:
+        headlines = fallback_headlines(query)
+    if not query:
+        return {"status": "unavailable", "note": "검색할 주제가 없습니다.", "candidates": []}
+    cid, secret = os.getenv("NAVER_CLIENT_ID"), os.getenv("NAVER_CLIENT_SECRET")
+    if not (cid and secret) or BLOG_API_AVAILABLE is False:
+        return {
+            "status": "unavailable",
+            "query": query,
+            "note": "NAVER API HUB의 블로그 검색 서비스를 신청하면 자동 비교됩니다.",
+            "candidates": [],
+        }
+    try:
+        res = requests.get(
+            BLOG_URL,
+            params={"query": query, "display": 100, "sort": "sim", "format": "json"},
+            headers={
+                "X-NCP-APIGW-API-KEY-ID": cid,
+                "X-NCP-APIGW-API-KEY": secret,
+            },
+            timeout=20,
+        )
+        if res.status_code in {400, 401, 403, 404}:
+            BLOG_API_AVAILABLE = False
+        res.raise_for_status()
+        BLOG_API_AVAILABLE = True
+        items = res.json().get("items", [])
+        candidates = []
+        for headline in headlines:
+            best = {"score": 0.0, "title": "", "link": ""}
+            for item in items:
+                score = title_similarity(headline, item.get("title", ""))
+                if score > best["score"]:
+                    best = {
+                        "score": score,
+                        "title": html.unescape(re.sub(r"<[^>]+>", "", str(item.get("title", "")))),
+                        "link": item.get("link", ""),
+                    }
+            candidates.append({"title": headline, "score": best["score"], "match": best})
+        return {
+            "status": "ok",
+            "query": query,
+            "checked_count": len(items),
+            "note": "네이버 블로그 검색 상위 결과 제목과 비교한 추정치입니다. 높을수록 유사한 제목이 있다는 뜻입니다.",
+            "candidates": candidates,
+        }
+    except Exception as exc:
+        print(f"  [블로그 제목 유사도 생략] {type(exc).__name__}: {exc}")
+        return {
+            "status": "error",
+            "query": query,
+            "note": "네이버 블로그 검색을 완료하지 못했습니다. 검색 API 권한과 키를 확인하세요.",
+            "candidates": [],
+        }
+
+
+def enrich_blog_similarity(topics):
+    for index, topic in enumerate(topics, 1):
+        topic["naver_blog_similarity"] = fetch_blog_similarity(topic)
+        if topic["naver_blog_similarity"].get("status") == "ok":
+            print(f"  블로그 제목 유사도 확인 {index}/{len(topics)}")
+    return topics
+
+
 def build(label, articles, n, per, min_sources, past_titles, excluded_links=(), focus=""):
     excluded = set(excluded_links)
     articles = [a for a in articles if a.get("link") not in excluded]
@@ -457,6 +727,7 @@ def main():
             selected_links,
             category_cfg.get("focus", ""),
         )
+        topics = enrich_blog_similarity(rank_topics(topics))
         selected_links.update(a.get("link") for t in topics for a in t["articles"] if a.get("link"))
         selected_titles.extend(t["topic"] for t in topics)
         print(f"  주제 {len(topics)}개")
@@ -487,6 +758,7 @@ def main():
                 selected_links,
                 celeb_cfg.get("focus", "연예인의 건강 공개·회복·생활 습관 관련 이슈"),
             )
+            out["celeb_topics"] = enrich_blog_similarity(rank_topics(out["celeb_topics"]))
             selected_links.update(
                 a.get("link")
                 for t in out["celeb_topics"]

@@ -56,7 +56,7 @@ python scripts/verify_sources.py
 
 [NAVER Cloud Console](https://console.ncloud.com) → `All Services` →
 `Application Services` → `NAVER API HUB` → 서비스 이용 신청 → `Application` →
-`Application 등록`에서 **NAVER 검색 → 뉴스**를 선택합니다.
+`Application 등록`에서 **NAVER 검색 → 뉴스**, **NAVER 검색 → 블로그**, **검색어트렌드**를 선택합니다.
 
 Application 이름은 영문·숫자·하이픈만 사용할 수 있으므로
 `blog-briefing-bot`을 권장합니다. 등록 후 `인증 정보`에서 Client ID와 Client Secret을
@@ -67,8 +67,9 @@ NAVER_CLIENT_ID       # API HUB Client ID
 NAVER_CLIENT_SECRET   # API HUB Client Secret
 ```
 
-없어도 RSS만으로 동작하지만, 연예인 건강 이슈와 최신 검색 결과를 안정적으로 채우려면
-API HUB 키를 넣는 것이 좋습니다. 자세한 이관 절차는 [NAVER API HUB 이관 가이드](https://guide.ncloud-docs.com/docs/apihub-migration)를 참고하세요.
+뉴스 API가 없어도 RSS만으로 일부 동작하지만, 최신 검색 결과·관심도 순위·네이버 블로그 제목 유사도까지 사용하려면
+세 서비스를 모두 선택하는 것이 좋습니다. 세 서비스는 같은 API HUB Client ID/Secret을 사용합니다.
+자세한 이관 절차는 [NAVER API HUB 이관 가이드](https://guide.ncloud-docs.com/docs/apihub-migration)를 참고하세요.
 
 ### 5. OpenRouter 키
 
@@ -142,8 +143,17 @@ python scripts/get_kakao_token.py <REST_API_키> <클라이언트_시크릿>
 
 날짜별 브리핑의 `상세 조사 정리`를 누르면 주제별 랜딩페이지가 열립니다.
 랜딩페이지에는 핵심 팩트, 작성 전 확인사항, 독자용 체크리스트, 기사 3개 요지,
-글 구성안, 제목 후보와 검색 키워드가 들어갑니다. 확인되지 않은 대상·수치·일정은
+글 구성안, 홈판 제목 30개, 네이버 블로그 제목 유사도 조사와 검색 키워드가 들어갑니다. 확인되지 않은 대상·수치·일정은
 랜딩페이지의 작성 전 확인 영역에서 원문 확인 대상으로 표시합니다.
+
+주제는 카테고리 안에서 관심도 높은 순으로 표시됩니다. 검색어트렌드 API가 연결되면 최근 7일의
+네이버 검색어 상대지수로 정렬하고, 연결되지 않으면 기사 최신성·출처 확산을 이용한 추정 순위로 표시합니다.
+상대지수는 절대 검색량이나 조회수를 뜻하지 않습니다.
+
+홈판 제목 생성 규칙은 `prompts/home_title_prompt.txt`에 있습니다. 원하는 제목 생성 프롬프트를
+이 파일 내용으로 교체하면 다음 실행부터 30개 제목 생성에 반영됩니다. 제목 선택 후 `선택 제목 복사`를 누를 수 있습니다.
+네이버 블로그 유사도는 NAVER API HUB 블로그 검색 상위 결과의 제목과 비교한 참고용 추정치이며,
+표절 여부나 실제 검색 노출 순위를 확정하는 기능은 아닙니다.
 
 기본으로 다음 세부 카테고리에서 각각 5개 주제를 만듭니다.
 
@@ -173,6 +183,7 @@ python scripts/get_kakao_token.py <REST_API_키> <클라이언트_시크릿>
 | 연예인 이슈 키워드 | `sources.yaml` → `health_current.celeb.naver_queries` |
 | 발송 시각 | `.github/workflows/daily.yml` → `cron` (UTC 기준, KST −9시간) |
 | 주제 뽑는 기준·말투 | `scripts/process.py` → `PROMPT` |
+| 홈판 제목 생성 규칙 | `prompts/home_title_prompt.txt` |
 | 사이트 디자인 | `scripts/build_site.py` → `CSS` |
 
 ## 주의할 점
