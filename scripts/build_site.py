@@ -130,6 +130,15 @@ footer a{color:var(--muted)}
 .source-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
 .source-card a{color:var(--ink);font-weight:600;text-decoration:none}
 .source-card p{font-size:.82rem;color:var(--muted);margin:6px 0 0}
+.table-scroll{overflow-x:auto}
+.comparison{width:100%;border-collapse:collapse;font-size:.78rem;background:var(--card)}
+.comparison th,.comparison td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.comparison th{color:var(--muted);font-weight:600;white-space:nowrap}
+.comparison a{color:var(--ink)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 18px}
+.stat-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px}
+.stat-card strong{display:block;font-size:1.35rem}
+.stat-card span{color:var(--muted);font-size:.76rem}
 .headline-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
 .headline-option{display:flex;gap:8px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;cursor:pointer}
 .headline-option:has(input:checked){border-color:#3b8f5b;box-shadow:0 0 0 1px #3b8f5b inset}
@@ -410,6 +419,63 @@ def render_top_n_judgment(topic):
     )
 
 
+CELEBRITY_PROFILE_FIELDS = ("나이", "혈액형", "MBTI", "고향", "학력", "재산", "활동")
+
+
+def render_celebrity_profile(topic):
+    profile = ((topic.get("landing") or {}).get("celebrity_profile") or {})
+    name = profile.get("name") or "인물명 확인 필요"
+    fields = profile.get("fields") or {}
+    rows = []
+    for field_name in CELEBRITY_PROFILE_FIELDS:
+        item = fields.get(field_name) or {}
+        value = item.get("value") or "미공개·확인 필요"
+        status = item.get("status") or "원문 확인 필요"
+        refs = item.get("source_article_ids") or []
+        ref_text = " · 근거 연결" if refs else ""
+        rows.append(
+            f'<tr><th>{esc(field_name)}</th><td>{esc(value)}'
+            f'<br><span class="amet">{esc(status)}{ref_text}</span></td></tr>'
+        )
+    if not rows:
+        rows.append('<tr><td colspan="2">프로필 정보는 공식 자료 확인 후 입력됩니다.</td></tr>')
+    return (
+        f'<section class="detail-section"><h3>연예인 프로필 확인</h3>'
+        f'<p class="method-note"><strong>{esc(name)}</strong> · 기사 근거가 없는 나이·MBTI·재산 등은 추정하지 않습니다.</p>'
+        f'<div class="table-scroll"><table class="comparison"><thead><tr><th>항목</th><th>확인 내용</th></tr></thead>'
+        f'<tbody>{"".join(rows)}</tbody></table></div></section>'
+    )
+
+
+def render_celebrity_blog_references(topic):
+    references = topic.get("celebrity_blog_references") or {}
+    query = references.get("query") or topic.get("topic", "")
+    if references.get("status") != "ok":
+        note = references.get("note") or "네이버 블로그 참고글을 아직 확인하지 못했습니다."
+        return (
+            f'<section class="detail-section"><h3>네이버 블로그 참고글</h3>'
+            f'<p class="method-note">{esc(note)} '
+            f'<a href="{safe_href(naver_blog_search_url(query))}" target="_blank" rel="noopener">직접 검색 →</a></p></section>'
+        )
+    candidates = references.get("candidates") or []
+    cards = []
+    for index, item in enumerate(candidates[:3], 1):
+        hits = item.get("keyword_hits") or []
+        cards.append(
+            f'<article class="source-card"><div class="tnum">참고글 {index} · '
+            f'키워드 포함도 {esc(item.get("match_score"))}% · {esc(item.get("postdate"))}</div>'
+            f'<a href="{safe_href(item.get("link"))}" target="_blank" rel="noopener">{esc(item.get("title"))}</a>'
+            f'<p>{esc(item.get("bloggername"))} · 검색 확인 키워드: {esc(", ".join(hits) or "없음")}</p>'
+            f'<p>{esc(item.get("description") or "검색 요약문이 없습니다. 원문에서 확인하세요.")}</p></article>'
+        )
+    cards_html = "".join(cards) or '<p class="empty">참고글이 없습니다.</p>'
+    return (
+        f'<section class="detail-section"><h3>네이버 블로그 참고글 3개</h3>'
+        f'<p class="method-note">{esc(references.get("note"))} · 검색 결과 {esc(references.get("checked_count", 0))}개 확인</p>'
+        f'<div class="sources">{cards_html}</div></section>'
+    )
+
+
 def render_topic(idx, topic, detail_href=None, check_id=None):
     arts = "".join(
         f'<li><a href="{safe_href(article.get("link"))}" target="_blank" rel="noopener">'
@@ -434,6 +500,24 @@ def render_completion_control(check_id):
     return f'''<div class="topic-tools"><label class="complete-toggle">
 <input class="topic-check" type="checkbox" data-topic-id="{esc(check_id)}">
 <span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>'''
+
+
+def render_article_comparison(articles):
+    rows = []
+    for index, article in enumerate(articles[:3], 1):
+        link = safe_href(article.get("link"))
+        title = esc(article.get("title"))
+        title_html = f'<a href="{link}" target="_blank" rel="noopener">{title}</a>'
+        rows.append(
+            f'<tr><td>{index}</td><td>{esc(article.get("source"))}<br>'
+            f'<span class="amet">{esc(article.get("published_label"))}</span></td>'
+            f'<td>{title_html}</td><td>{esc(article.get("summary") or "원문 확인 필요")}</td></tr>'
+        )
+    return (
+        '<div class="table-scroll"><table class="comparison"><thead><tr>'
+        '<th>번호</th><th>출처·발행</th><th>기사 제목</th><th>수집된 요약</th>'
+        f'</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
+    )
 
 
 def render_topic_page(brief, category_key, category, topic, is_celeb=False):
@@ -481,6 +565,8 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
         f'<div class="detail-section"><h3>내부링크 아이디어</h3>{render_list(internal)}</div>'
         if internal else ""
     )
+    celebrity_profile_block = render_celebrity_profile(topic) if is_celeb else ""
+    celebrity_blog_block = render_celebrity_blog_references(topic) if is_celeb else ""
     completion = render_completion_control(f"{date}:{page_id}")
     return f"""<!doctype html><html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -488,7 +574,7 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
 <meta name="description" content="{esc(str(lead)[:150])}">
 <title>{esc(topic.get("topic"))} | 블로그 브리핑</title>
 <style>{CSS}</style></head><body><div class="wrap">
-<div class="back"><a href="../{esc(date)}.html">← {date_label(date)} 브리핑으로 돌아가기</a></div>
+<div class="back"><a href="../{esc(date)}.html">← {date_label(date)} 브리핑으로 돌아가기</a> · <a href="../celebrity.html">연예인 정보 탭</a></div>
 <div class="hero"><div class="date">{esc(category.get("label"))} · {esc(section)} {interest_badge(topic)}</div>
 {completion}<h2>{esc(topic.get("topic"))}</h2><p>{esc(lead)}</p>{warning}</div>
 <section class="detail-section"><h3>핵심 팩트</h3>{render_list(facts)}</section>
@@ -496,6 +582,9 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
 <section class="detail-section"><h3>독자에게 실익이 있는 포인트</h3>{render_list(practical)}</section>
 {caution_block}
 <section class="detail-section"><h3>관련 기사 3개</h3><div class="sources">{"".join(source_cards)}</div></section>
+<section class="detail-section"><h3>기사 3개 비교표</h3><p class="method-note">아래 요약은 수집된 기사 정보이며, 발행 전에는 각 원문을 직접 확인하세요.</p>{render_article_comparison(topic.get("articles", []))}</section>
+{celebrity_profile_block}
+{celebrity_blog_block}
 <section class="detail-section"><h3>블로그 글 구성안</h3>{render_list(structure, ordered=True)}</section>
 <section class="detail-section"><h3>홈판 제목 추천 30개</h3>
 <p class="method-note">제목을 하나 선택한 뒤 복사해서 블로그 초안에 사용하세요.</p>
@@ -526,6 +615,14 @@ def render_day(brief, prev_date=None, next_date=None):
                 for item in trend_summary[:5]
             )
             meta += f'<div class="trend-summary">검색 관심 키워드: {trend_text}</div>'
+        shopping_summary = category.get("shopping_summary") or []
+        if shopping_summary:
+            shopping_text = " · ".join(
+                f'{esc(item.get("keyword"))} {esc(item.get("score"))} '
+                f'(변화 {float(item.get("momentum", 0)):+g})'
+                for item in shopping_summary[:5]
+            )
+            meta += f'<div class="trend-summary">쇼핑 클릭 관심도(상대지수): {shopping_text}</div>'
         parts = [
             f'<section class="cat"><div class="cathead">'
             f'<span class="dot" style="background:{color}"></span>'
@@ -563,6 +660,8 @@ def render_day(brief, prev_date=None, next_date=None):
         '<a href="./">최신</a>',
         '<a href="archive.html">지난 브리핑</a>',
         '<a href="category.html">카테고리별</a>',
+        '<a href="celebrity.html">연예인 정보</a>',
+        '<a href="stats.html">통계</a>',
         '<a href="tracker.html">작성 관리</a>',
     ]
     if prev_date:
@@ -629,7 +728,7 @@ def render_run_page(brief, run_id):
 <title>{date_label(brief["date"])} {generated} 실행 기록</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>브리핑 실행 기록</h1>
 <div class="date">{date_label(brief["date"])} · {generated} 실행</div>
-<nav class="nav"><a href="../">최신 브리핑</a><a href="../archive.html">날짜별 보관</a><a href="../category.html">카테고리별</a><a href="../tracker.html">작성 관리</a></nav></header>
+<nav class="nav"><a href="../">최신 브리핑</a><a href="../archive.html">날짜별 보관</a><a href="../category.html">카테고리별</a><a href="../celebrity.html">연예인 정보</a><a href="../stats.html">통계</a><a href="../tracker.html">작성 관리</a></nav></header>
 {checkbar}
 {"".join(body)}
 <footer>같은 날짜에 다시 실행된 브리핑도 이 페이지에서 확인할 수 있습니다.</footer>
@@ -659,7 +758,7 @@ def render_archive(dates, runs=None):
 <title>지난 브리핑</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>지난 브리핑</h1>
 <div class="date">{len(dates)}일치</div>
-<nav class="nav"><a href="./">최신으로</a><a href="category.html">카테고리별</a><a href="tracker.html">작성 관리</a></nav></header>
+<nav class="nav"><a href="./">최신으로</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
 <h2>날짜별 브리핑</h2><ul class="arch">{"".join(items) or "<li>아직 날짜별 브리핑이 없습니다.</li>"}</ul>
 {run_section}</div></body></html>"""
 
@@ -669,6 +768,7 @@ def render_category_dashboard(brief, tracker_rows=None):
     rows = []
     category_options = []
     seen_categories = set()
+    total = written_count = published_count = 0
     for category_key, category in brief.get("categories", {}).items():
         parent, subcategory = category_info(category_key, category)
         if parent not in seen_categories:
@@ -683,16 +783,31 @@ def render_category_dashboard(brief, tracker_rows=None):
             written = tracker.get("작성 여부") or "미작성"
             published = tracker.get("발행 여부") or "미발행"
             content_type = topic_content_type(topic, category_key)
+            interest = (topic.get("interest") or {}).get("score")
+            interest_text = f"관심도 {interest}" if interest is not None else "관심도 미산정"
+            shopping_interest = topic.get("shopping_interest") or {}
+            if shopping_interest:
+                interest_text += (
+                    f' · 쇼핑 {shopping_interest.get("score")} '
+                    f'(변화 {shopping_interest.get("momentum", 0):+})'
+                )
+            total += 1
+            if "작성완료" in str(written).replace(" ", ""):
+                written_count += 1
+            if "발행완료" in str(published).replace(" ", "") or tracker.get("발행 URL"):
+                published_count += 1
             row_subcategory = "연예인 건강" if section == "연예인 건강" else subcategory
             search_text = " ".join([
                 parent, row_subcategory, section, content_type,
                 str(topic.get("topic") or ""), str(topic.get("basis") or ""),
+                str(shopping_interest.get("keyword") or ""),
             ])
             rows.append(
                 f'<tr data-parent="{esc(parent)}" data-search="{esc(search_text.lower())}">'
                 f'<td>{esc(parent)}</td><td><span class="tag">{esc(row_subcategory)}</span>'
                 f'<br><span class="amet">{esc(section)}</span></td>'
-                f'<td><span class="tag">{esc(content_type)}</span></td>'
+                f'<td><span class="tag">{esc(content_type)}</span><br>'
+                f'<span class="amet">{esc(interest_text)}</span></td>'
                 f'<td class="topic-cell"><a href="topics/{esc(page_id)}.html">{esc(topic.get("topic"))}</a>'
                 f'<br><span class="amet">{esc(topic.get("basis"))}</span></td>'
                 f'<td class="status">{esc(written)}<br>{esc(published)}</td>'
@@ -704,12 +819,12 @@ def render_category_dashboard(brief, tracker_rows=None):
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>카테고리별 블로그 브리핑</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>카테고리별 블로그 브리핑</h1>
-<div class="date">{date_label(brief["date"])} · 오늘 주제 {len(rows)}개</div>
-<nav class="nav"><a href="./">오늘의 브리핑</a><a href="archive.html">날짜별 보관</a><a href="tracker.html">작성 관리</a></nav></header>
+<div class="date">{date_label(brief["date"])} · 오늘 주제 {total}개 · 작성 완료 {written_count}개 · 발행 완료 {published_count}개</div>
+<nav class="nav"><a href="./">오늘의 브리핑</a><a href="archive.html">날짜별 보관</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
 <div class="dashboard-tools"><select id="parent-filter"><option value="">전체 대분류</option>{options}</select>
 <input id="topic-search" type="search" placeholder="주제·세부 카테고리 검색"></div>
 <p class="date">세부 카테고리와 콘텐츠 유형을 확인하고, 상세 조사·작성 상태를 한눈에 관리할 수 있습니다.</p>
-<table class="category-table"><thead><tr><th>대분류</th><th>세부 카테고리</th><th>콘텐츠 유형</th><th>주제</th><th>작성·발행</th><th>완료</th></tr></thead>
+<table class="category-table"><thead><tr><th>대분류</th><th>세부 카테고리</th><th>콘텐츠 유형·관심도</th><th>주제</th><th>작성·발행</th><th>완료</th></tr></thead>
 <tbody id="category-rows">{"".join(rows) or '<tr><td colspan="6">오늘 주제가 없습니다.</td></tr>'}</tbody></table>
 <footer>완료 체크는 이 브라우저에 저장됩니다. 작성·발행 상태를 여러 기기에서 유지하려면 작성 관리표를 수정해 커밋하세요.</footer>
 </div>{CHECK_SCRIPT}<script>
@@ -730,6 +845,100 @@ def render_category_dashboard(brief, tracker_rows=None):
   search.addEventListener('input', apply);
 }})();
 </script></body></html>"""
+
+
+def render_celebrity_dashboard(brief):
+    cards = []
+    total = 0
+    for category_key, category in brief.get("categories", {}).items():
+        for topic in category.get("celeb_topics", []) or []:
+            total += 1
+            page_id = topic_page_id(brief["date"], category_key, topic)
+            profile = ((topic.get("landing") or {}).get("celebrity_profile") or {})
+            name = profile.get("name") or topic.get("topic") or "인물명 확인 필요"
+            check_id = brief["date"] + ":" + page_id
+            cards.append(
+                f'<article class="topic celeb"><div class="tnum">{esc(category.get("label"))}</div>'
+                f'{render_completion_control(check_id)}'
+                f'<div class="ttitle">{esc(name)}</div><p class="tbasis">{esc(topic.get("topic"))}</p>'
+                f'<a class="detail-link" href="topics/{esc(page_id)}.html">기사·프로필·참고글 상세 보기 →</a>'
+                f'{render_celebrity_profile(topic)}{render_celebrity_blog_references(topic)}</article>'
+            )
+    content = "".join(cards) or '<p class="empty">현재 연예인 정보 주제가 없습니다.</p>'
+    return f"""<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>연예인 정보 브리핑</title><style>{CSS}</style></head><body><div class="wrap">
+<header class="top"><h1>연예인 정보</h1>
+<div class="date">{date_label(brief["date"])} · 현재 이슈 {total}개</div>
+<nav class="nav"><a href="./">오늘의 브리핑</a><a href="archive.html">날짜별 보관</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
+<div class="checkbar"><strong data-check-summary>완료 0 / 전체 0</strong><span>프로필 확인과 블로그 참고글 조사가 끝난 주제를 체크하세요.</span><button type="button" data-reset-checks>이 페이지 체크 지우기</button></div>
+<p class="method-note">프로필은 기사·공식 자료에 근거한 내용만 표시합니다. 네이버 블로그 참고글은 조회수 순위가 아니라 검색 정확도와 요약문 키워드 포함도 기준입니다.</p>
+{"".join(cards) or '<p class="empty">현재 연예인 정보 주제가 없습니다.</p>'}
+<footer>재산·MBTI·혈액형 등은 공식 공개 자료가 없으면 미공개·확인 필요로 표시합니다.</footer>
+</div>{CHECK_SCRIPT}</body></html>"""
+
+
+def render_stats_page(briefs, tracker_rows=None):
+    tracker_map = {row.get("topic_id"): row for row in (tracker_rows or []) if row.get("topic_id")}
+    category_stats = {}
+    daily_stats = []
+    total = written = published = 0
+
+    for brief in briefs[-7:]:
+        day_total = 0
+        for category_key, category in brief.get("categories", {}).items():
+            parent, subcategory = category_info(category_key, category)
+            topics = list(category.get("topics", [])) + list(category.get("celeb_topics", []))
+            stat = category_stats.setdefault(
+                (parent, subcategory), {"topics": 0, "written": 0, "published": 0}
+            )
+            for topic in topics:
+                day_total += 1
+                total += 1
+                topic_id = topic.get("topic_id") or topic_page_id(brief["date"], category_key, topic)
+                row = tracker_map.get(topic_id, {})
+                writing = str(row.get("작성 여부") or "").replace(" ", "")
+                pub = str(row.get("발행 여부") or "").replace(" ", "")
+                is_written = "작성완료" in writing
+                is_published = "발행완료" in pub or bool(str(row.get("발행 URL") or "").strip())
+                stat["topics"] += 1
+                if is_written:
+                    stat["written"] += 1
+                    written += 1
+                if is_published:
+                    stat["published"] += 1
+                    published += 1
+        daily_stats.append((brief["date"], day_total))
+
+    category_rows = "".join(
+        f'<tr><td>{esc(parent)}</td><td>{esc(subcategory)}</td><td>{values["topics"]}</td>'
+        f'<td>{values["written"]}</td><td>{values["published"]}</td></tr>'
+        for (parent, subcategory), values in sorted(category_stats.items())
+    )
+    daily_rows = "".join(
+        f'<tr><td><a href="{esc(date)}.html">{esc(date)}</a></td><td>{count}</td></tr>'
+        for date, count in reversed(daily_stats)
+    )
+    period = (
+        f'{briefs[max(0, len(briefs) - 7)]["date"]} ~ {briefs[-1]["date"]}'
+        if briefs else "자료 없음"
+    )
+    return f"""<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>브리핑 통계</title><style>{CSS}</style></head><body><div class="wrap">
+<header class="top"><h1>브리핑 통계</h1><div class="date">최근 7일 · {esc(period)}</div>
+<nav class="nav"><a href="./">오늘의 브리핑</a><a href="archive.html">날짜별 보관</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
+<div class="stats-grid"><div class="stat-card"><strong>{total}</strong><span>최근 7일 주제</span></div>
+<div class="stat-card"><strong>{written}</strong><span>작성 완료</span></div>
+<div class="stat-card"><strong>{published}</strong><span>발행 완료</span></div>
+<div class="stat-card"><strong>{len(category_stats)}</strong><span>세부 카테고리</span></div></div>
+<section class="detail-section"><h2>세부 카테고리별</h2>
+<table class="category-table"><thead><tr><th>대분류</th><th>세부 카테고리</th><th>주제</th><th>작성 완료</th><th>발행 완료</th></tr></thead>
+<tbody>{category_rows or '<tr><td colspan="5">아직 통계가 없습니다.</td></tr>'}</tbody></table></section>
+<section class="detail-section"><h2>날짜별 주제 수</h2>
+<table class="category-table"><thead><tr><th>날짜</th><th>주제 수</th></tr></thead><tbody>
+{daily_rows or '<tr><td colspan="2">아직 통계가 없습니다.</td></tr>'}</tbody></table></section>
+</div></body></html>"""
 
 
 def render_tracker(rows):
@@ -755,7 +964,7 @@ def render_tracker(rows):
 <title>블로그 작성 관리</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>블로그 작성 관리</h1>
 <div class="date">Excel 또는 Google Sheets에서 editorial_tracker.csv를 수정하세요.</div>
-<nav class="nav"><a href="./">최신 브리핑</a><a href="archive.html">지난 브리핑</a><a href="category.html">카테고리별</a>
+<nav class="nav"><a href="./">최신 브리핑</a><a href="archive.html">지난 브리핑</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a>
 <a href="editorial_tracker.csv">CSV 내려받기</a></nav></header>
 <table class="tracker"><thead><tr><th>날짜</th><th>카테고리</th><th>주제</th>
 <th>작성 여부</th><th>발행 여부</th><th>발행 URL</th></tr></thead>
@@ -821,6 +1030,16 @@ def main():
         latest_brief = json.load(f)
     with open(os.path.join(DOCS, "category.html"), "w", encoding="utf-8") as f:
         f.write(render_category_dashboard(latest_brief, tracker_rows))
+
+    with open(os.path.join(DOCS, "celebrity.html"), "w", encoding="utf-8") as f:
+        f.write(render_celebrity_dashboard(latest_brief))
+
+    recent_briefs = []
+    for path in files[-7:]:
+        with open(path, encoding="utf-8") as f:
+            recent_briefs.append(json.load(f))
+    with open(os.path.join(DOCS, "stats.html"), "w", encoding="utf-8") as f:
+        f.write(render_stats_page(recent_briefs, tracker_rows))
 
     with open(os.path.join(DOCS, ".nojekyll"), "w", encoding="utf-8") as f:
         f.write("")

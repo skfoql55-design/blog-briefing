@@ -12,6 +12,7 @@ OPENROUTER_API_KEY 가 없거나 LLM 응답이 검증에 실패하면
 기사 제목 기반 폴백으로 동작한다. 폴백도 기사 수와 출처 수를 검증한다.
 """
 import datetime as dt
+import csv
 import hashlib
 import html
 import json
@@ -29,9 +30,11 @@ MODEL = os.getenv("OPENROUTER_MODEL", "z-ai/glm-5.3-flash")
 MAX_HEADLINES = 60
 TREND_URL = "https://naverapihub.apigw.ntruss.com/search-trend/v1/search"
 BLOG_URL = "https://naverapihub.apigw.ntruss.com/search/v1/blog"
+SHOPPING_URL = "https://naverapihub.apigw.ntruss.com/shopping/v1/category/keywords"
 TITLE_PROMPT_FILE = os.path.join(ROOT, "prompts", "home_title_prompt.txt")
 RUNS_DIR = os.path.join(ROOT, "data", "runs")
 BLOG_API_AVAILABLE = None
+CELEBRITY_PROFILE_FIELDS = ("나이", "혈액형", "MBTI", "고향", "학력", "재산", "활동")
 
 STOP = set("""기자 뉴스 종합 속보 단독 오늘 내일 올해 지난 대한 위해 관련 대해 통해 있다 없다
 그리고 하지만 이번 지난해 우리 국내 이날 대비 중인 것으로 밝혔다 전했다 나타났다""".split())
@@ -51,6 +54,24 @@ def load_title_prompt():
         "확인형 제목을 섞어 정확히 30개 만든다. 제목끼리 표현과 각도를 반복하지 않는다. "
         "홈판용이므로 짧고 자연스러운 한국어로 쓴다."
     )
+
+
+def load_published_titles(path):
+    """작성 관리표에서 발행 완료된 주제를 읽어 다음 수집에서 자동 제외한다."""
+    if not os.path.exists(path):
+        return []
+    titles = []
+    try:
+        with open(path, encoding="utf-8-sig", newline="") as f:
+            for row in csv.DictReader(f):
+                status = str(row.get("발행 여부") or "").strip()
+                published_url = str(row.get("발행 URL") or "").strip()
+                title = str(row.get("주제") or "").strip()
+                if title and ("발행완료" in status or published_url):
+                    titles.append(title)
+    except (OSError, csv.Error):
+        return []
+    return titles
 
 
 def fallback_headlines(topic, label=""):
@@ -168,7 +189,7 @@ def default_landing(label, topic, basis, articles):
             "진단·치료 효과를 단정하거나 확인되지 않은 소문을 사실처럼 쓰지 마세요.",
         ]
     headlines = fallback_headlines(topic, label)
-    return {
+    result = {
         "lead": basis or topic,
         "verification_note": "기사 요약만으로 확정하기 어려운 내용은 원문과 공식 공시를 먼저 확인하세요.",
         "confirmed_facts": facts[:5],
@@ -194,6 +215,20 @@ def default_landing(label, topic, basis, articles):
         "internal_link_ideas": [],
         "cautions": cautions,
     }
+    if "연예인 건강" in label:
+        result["celebrity_profile"] = {
+            "name": "",
+            "query_keywords": ["프로필", "나이", "혈액형", "MBTI", "고향", "학력", "재산"],
+            "fields": {
+                field: {
+                    "value": "",
+                    "status": "미공개·확인 필요",
+                    "source_article_ids": [],
+                }
+                for field in CELEBRITY_PROFILE_FIELDS
+            },
+        }
+    return result
 
 
 def normalize_landing(label, topic, basis, articles, value):
@@ -283,6 +318,38 @@ def normalize_landing(label, topic, basis, articles, value):
     for field in ("lead", "verification_note"):
         if isinstance(value.get(field), str) and value[field].strip():
             result[field] = value[field].strip()
+    raw_profile = value.get("celebrity_profile")
+    if isinstance(raw_profile, dict):
+        profile = {
+            "name": str(raw_profile.get("name") or "").strip(),
+            "query_keywords": [],
+            "fields": {},
+        }
+        raw_keywords = raw_profile.get("query_keywords") or []
+        if isinstance(raw_keywords, list):
+            profile["query_keywords"] = list(dict.fromkeys(
+                str(item).strip() for item in raw_keywords if str(item).strip()
+            ))[:8]
+        raw_fields = raw_profile.get("fields") or {}
+        if isinstance(raw_fields, dict):
+            for field_name in CELEBRITY_PROFILE_FIELDS:
+                item = raw_fields.get(field_name) or raw_fields.get(field_name.lower())
+                if isinstance(item, dict):
+                    field_value = str(item.get("value") or "").strip()
+                    status = str(item.get("status") or "확인 필요").strip()
+                    refs = item.get("source_article_ids") or []
+                else:
+                    field_value = str(item or "").strip()
+                    status = "원문 확인 필요" if field_value else "미공개·확인 필요"
+                    refs = []
+                refs = [int(ref) for ref in refs if isinstance(ref, int) and not isinstance(ref, bool)]
+                profile["fields"][field_name] = {
+                    "value": field_value,
+                    "status": status,
+                    "source_article_ids": refs[:3],
+                }
+        if profile["name"] or profile["fields"]:
+            result["celebrity_profile"] = profile
     return result
 
 
@@ -373,7 +440,7 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
 
 아래는 오늘 '{label}' 분야에 올라온 기사 목록이다.
 이 분야의 편집 방향은 다음과 같다: {focus}
-이 분야에서 검색어트렌드로 확인된 관심 키워드는 다음과 같다: {trend_context}
+이 분야에서 검색어트렌드와 쇼핑인사이트로 확인된 참고 키워드는 다음과 같다: {trend_context}
 같은 사건이나 흐름을 다루면서도 서로 다른 정보가 있는 기사 {per}개를 한 묶음으로 만들어,
 블로그 글로 쓸 주제 {n}개를 골라라.
 
@@ -398,6 +465,11 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
   - "keywords": 검색 키워드 3~6개.
   - "internal_link_ideas": 연결하면 좋은 글 아이디어 1~3개.
   - "cautions": 단정하면 안 되는 내용이나 확인 주의사항.
+  - 연예인 건강 이슈라면 "celebrity_profile" 객체도 만든다. 일반 주제는 null로 둔다.
+    "name"은 기사에서 확인되는 인물명, "query_keywords"는 프로필 검색에 쓸 단어 3~8개,
+    "fields"에는 나이·혈액형·MBTI·고향·학력·재산·활동을 넣는다.
+    각 필드는 {"value":"...","status":"기사 확인|공식 확인 필요|미공개·확인 필요","source_article_ids":[0]} 형식으로 쓴다.
+    제공된 기사에 근거가 없는 프로필 값은 만들지 말고 빈 값과 "미공개·확인 필요"로 표시한다.
 
 기사 묶음 규칙:
 - 기사 URL이 서로 달라야 한다.
@@ -417,7 +489,9 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
 - "이 번호", "이 돈", "이것"처럼 가린 표현은 브리프 안에 실제 답이 있을 때만 사용한다.
 - 숫자만으로 대조 항목이 부족하면 TOP N을 쓰지 않는다.
 - 뉴스·정책·리콜은 필요하면 TOP N 대신 뉴스·변경형 제목을 우선한다.
+- 쇼핑인사이트 값은 네이버쇼핑 영역의 검색 클릭 상대지수와 최근 변화 참고값일 뿐, 판매량·매출·절대 인기 순위로 단정하지 않는다.
 - RSS 제목·검색 결과 요약만 근거로 삼은 제목은 `원문 확인 필요`로 표시하고, 원문이나 공식 자료를 실제로 받은 경우에만 `확정 팩트 기반`으로 표시한다.
+- 연예인 프로필의 나이·혈액형·MBTI·고향·학력·재산은 기사에 근거가 없으면 추정하지 않는다. 특히 재산은 공식 공개 자료가 없으면 `미공개·확인 필요`로 둔다.
 - `source_article_ids`는 입력 기사 배열의 0부터 시작하는 번호를 사용한다.
 - 아래 '이미 쓴 글' 및 '이번 실행에서 이미 고른 주제'와 겹치면 고르지 않는다.
 - 광고성 기사, 단순 인사·행사 기사는 제외한다.
@@ -700,6 +774,76 @@ def format_trend_context(values):
     return ", ".join(f'{item["keyword"]}({item["score"]})' for item in values)
 
 
+def fetch_shopping_insight(shopping_cfg):
+    """쇼핑 분야 키워드별 최근 클릭 관심도와 상승·하락 흐름을 조회한다."""
+    cid, secret = os.getenv("NAVER_CLIENT_ID"), os.getenv("NAVER_CLIENT_SECRET")
+    if not (cid and secret) or not isinstance(shopping_cfg, dict):
+        return []
+    category_code = str(shopping_cfg.get("category_code") or "").strip()
+    queries = []
+    for query in shopping_cfg.get("keywords", []) or []:
+        query = re.sub(r"\s+", " ", str(query or "")).strip()
+        if query and query not in queries:
+            queries.append(query)
+    if not category_code or not queries:
+        return []
+    today = dt.datetime.now(KST).date()
+    body = {
+        "startDate": (today - dt.timedelta(days=14)).isoformat(),
+        "endDate": today.isoformat(),
+        "timeUnit": "date",
+        "category": category_code,
+        "keyword": [{"name": query[:40], "param": [query]} for query in queries[:5]],
+    }
+    try:
+        res = requests.post(
+            SHOPPING_URL,
+            headers={
+                "X-NCP-APIGW-API-KEY-ID": cid,
+                "X-NCP-APIGW-API-KEY": secret,
+                "Content-Type": "application/json",
+            },
+            json=body,
+            timeout=20,
+        )
+        res.raise_for_status()
+        values = []
+        for result in res.json().get("results", []):
+            points = [
+                float(item.get("ratio", 0))
+                for item in (result.get("data") or [])
+                if item.get("ratio") is not None
+            ]
+            if not points:
+                continue
+            recent = points[-7:]
+            previous = points[-14:-7]
+            recent_score = sum(recent) / len(recent)
+            previous_score = sum(previous) / len(previous) if previous else recent_score
+            keyword = str(result.get("title") or "").strip()
+            values.append({
+                "keyword": keyword,
+                "score": round(recent_score, 1),
+                "momentum": round(recent_score - previous_score, 1),
+                "category": shopping_cfg.get("category_name") or category_code,
+            })
+        if values:
+            print(f"  네이버 쇼핑인사이트 비교 완료 - {len(values)}개 키워드")
+        return sorted(values, key=lambda item: (item["momentum"], item["score"]), reverse=True)
+    except Exception as exc:
+        print(f"  [쇼핑인사이트 생략] {type(exc).__name__}: {exc}")
+        return []
+
+
+def format_shopping_context(values):
+    if not values:
+        return "쇼핑인사이트 자료 없음"
+    return ", ".join(
+        f'{item["keyword"]}({item["score"]}, 변화 {item["momentum"]:+})'
+        for item in values[:5]
+    )
+
+
 def fallback_interest_score(topic):
     """검색어트렌드가 없을 때 기사 최신성·출처 확산으로 관심도를 추정한다."""
     now = dt.datetime.now(KST)
@@ -721,21 +865,36 @@ def fallback_interest_score(topic):
     return int(round(recency + source_score + keyword_score + title_score))
 
 
-def rank_topics(topics):
+def rank_topics(topics, shopping_values=None):
     """주제를 관심도 높은 순서로 정렬하고 순위·근거를 저장한다."""
     trend_scores = fetch_trend_scores(topics)
+    shopping_values = shopping_values or []
     for topic in topics:
         key = str(topic.get("topic_id") or topic.get("topic", ""))[:40]
         if key in trend_scores:
-            score = trend_scores[key]
+            search_score = trend_scores[key]
             method = "NAVER 검색어트렌드 상대지수"
         else:
-            score = fallback_interest_score(topic)
+            search_score = fallback_interest_score(topic)
             method = "기사 최신성·출처 확산 추정"
+        text = " ".join([str(topic.get("topic") or ""), *topic_keywords(topic)]).lower()
+        matched = [
+            item for item in shopping_values
+            if item.get("keyword") and str(item["keyword"]).lower() in text
+        ]
+        shopping = max(matched, key=lambda item: item.get("score", 0)) if matched else None
+        if shopping:
+            score = round(search_score * 0.7 + float(shopping.get("score", 0)) * 0.3, 1)
+            method += " + NAVER 쇼핑인사이트"
+            topic["shopping_interest"] = shopping
+        else:
+            score = search_score
+            topic["shopping_interest"] = None
         topic["interest"] = {
             "score": score,
             "method": method,
             "keywords": topic_keywords(topic),
+            "search_score": search_score,
         }
     topics.sort(key=lambda item: (-item.get("interest", {}).get("score", 0), item.get("topic", "")))
     for index, topic in enumerate(topics, 1):
@@ -825,11 +984,95 @@ def fetch_blog_similarity(topic):
         }
 
 
+def fetch_celeb_blog_references(topic):
+    """연예인 프로필 관련 참고 블로그 3개를 검색 정확도·키워드 포함도로 고른다."""
+    global BLOG_API_AVAILABLE
+    landing = topic.get("landing") or {}
+    profile = landing.get("celebrity_profile") or {}
+    name = str(profile.get("name") or topic.get("topic") or "").strip()
+    if not name:
+        return {"status": "unavailable", "candidates": [], "note": "인물명을 확인하지 못했습니다."}
+    cid, secret = os.getenv("NAVER_CLIENT_ID"), os.getenv("NAVER_CLIENT_SECRET")
+    if not (cid and secret) or BLOG_API_AVAILABLE is False:
+        return {
+            "status": "unavailable",
+            "query": f"{name} 프로필",
+            "candidates": [],
+            "note": "NAVER API HUB 블로그 검색 권한이 필요합니다.",
+        }
+    keywords = ["프로필", "나이", "혈액형", "MBTI", "고향", "학력", "재산"]
+    for item in profile.get("query_keywords") or []:
+        item = str(item).strip()
+        if item and item not in keywords:
+            keywords.append(item)
+    keywords = keywords[:10]
+    query = f"{name} 프로필"
+    try:
+        res = requests.get(
+            BLOG_URL,
+            params={"query": query, "display": 100, "sort": "sim", "format": "json"},
+            headers={
+                "X-NCP-APIGW-API-KEY-ID": cid,
+                "X-NCP-APIGW-API-KEY": secret,
+            },
+            timeout=20,
+        )
+        if res.status_code in {400, 401, 403, 404}:
+            BLOG_API_AVAILABLE = False
+        res.raise_for_status()
+        BLOG_API_AVAILABLE = True
+        candidates = []
+        for api_rank, item in enumerate(res.json().get("items", []), 1):
+            title = html.unescape(re.sub(r"<[^>]+>", "", str(item.get("title") or "")))
+            description = html.unescape(re.sub(r"<[^>]+>", "", str(item.get("description") or "")))
+            searchable = f"{title} {description}".lower()
+            hits = [keyword for keyword in keywords if keyword.lower() in searchable]
+            coverage = round(len(hits) / len(keywords) * 100, 1) if keywords else 0.0
+            candidates.append({
+                "api_rank": api_rank,
+                "match_score": coverage,
+                "keyword_hits": hits,
+                "title": title,
+                "description": description,
+                "link": item.get("link", ""),
+                "bloggername": item.get("bloggername", ""),
+                "bloggerlink": item.get("bloggerlink", ""),
+                "postdate": item.get("postdate", ""),
+            })
+        candidates = sorted(
+            candidates, key=lambda item: (-item["match_score"], item["api_rank"])
+        )[:3]
+        return {
+            "status": "ok",
+            "query": query,
+            "checked_count": len(res.json().get("items", [])),
+            "keywords": keywords,
+            "candidates": candidates,
+            "note": "조회수 순위가 아닌 네이버 검색 정확도와 검색 결과 요약문 키워드 포함도 기준입니다.",
+        }
+    except Exception as exc:
+        print(f"  [연예인 블로그 참고글 생략] {type(exc).__name__}: {exc}")
+        return {
+            "status": "error",
+            "query": query,
+            "candidates": [],
+            "note": "네이버 블로그 참고글을 가져오지 못했습니다. 검색 API 권한과 키를 확인하세요.",
+        }
+
+
 def enrich_blog_similarity(topics):
     for index, topic in enumerate(topics, 1):
         topic["naver_blog_similarity"] = fetch_blog_similarity(topic)
         if topic["naver_blog_similarity"].get("status") == "ok":
             print(f"  블로그 제목 유사도 확인 {index}/{len(topics)}")
+    return topics
+
+
+def enrich_celeb_blog_references(topics):
+    for index, topic in enumerate(topics, 1):
+        topic["celebrity_blog_references"] = fetch_celeb_blog_references(topic)
+        if topic["celebrity_blog_references"].get("status") == "ok":
+            print(f"  연예인 블로그 참고글 확인 {index}/{len(topics)}")
     return topics
 
 
@@ -864,6 +1107,8 @@ def main():
     past_titles = []
     if os.path.exists(past_path):
         past_titles = [line.strip() for line in open(past_path, encoding="utf-8") if line.strip()]
+    published_titles = load_published_titles(os.path.join(ROOT, "data", "editorial_tracker.csv"))
+    past_titles = list(dict.fromkeys(past_titles + published_titles))
     print(f"기존 글 {len(past_titles)}개를 중복 회피 목록으로 넘깁니다.\n")
 
     global_n = cfg.get("topics_per_category", 5)
@@ -878,8 +1123,15 @@ def main():
         n = category_cfg.get("topics_per_category", global_n)
         per = category_cfg.get("articles_per_topic", global_per)
         min_sources = category_cfg.get("min_unique_sources_per_topic", global_min_sources)
-        trend_values = fetch_keyword_trend_context(category_cfg.get("naver_queries", []))
+        trend_queries = list(category_cfg.get("naver_queries", []))
+        for query in block.get("creator_advisor_keywords", []) or []:
+            if query not in trend_queries:
+                trend_queries.append(query)
+        trend_values = fetch_keyword_trend_context(trend_queries)
+        shopping_values = fetch_shopping_insight(category_cfg.get("shopping_insight"))
         trend_context = format_trend_context(trend_values)
+        if shopping_values:
+            trend_context += " | 쇼핑인사이트: " + format_shopping_context(shopping_values)
         available = [a for a in block["articles"] if a.get("link") not in selected_links]
         print(f"[{block['label']}] 기사 {len(available)}건")
         topics = build(
@@ -893,7 +1145,7 @@ def main():
             category_cfg.get("focus", ""),
             trend_context,
         )
-        topics = enrich_blog_similarity(rank_topics(topics))
+        topics = enrich_blog_similarity(rank_topics(topics, shopping_values))
         selected_links.update(a.get("link") for t in topics for a in t["articles"] if a.get("link"))
         selected_titles.extend(t["topic"] for t in topics)
         print(f"  주제 {len(topics)}개")
@@ -903,6 +1155,8 @@ def main():
             "blog": block.get("blog"),
             "category_name": block.get("category_name"),
             "trend_summary": trend_values,
+            "creator_advisor_keywords": block.get("creator_advisor_keywords", []),
+            "shopping_summary": shopping_values,
             "articles_per_topic": per,
             "topics": topics,
         }
@@ -926,7 +1180,8 @@ def main():
                 celeb_cfg.get("focus", "연예인의 건강 공개·회복·생활 습관 관련 이슈"),
                 trend_context,
             )
-            out["celeb_topics"] = enrich_blog_similarity(rank_topics(out["celeb_topics"]))
+            out["celeb_topics"] = enrich_blog_similarity(rank_topics(out["celeb_topics"], shopping_values))
+            out["celeb_topics"] = enrich_celeb_blog_references(out["celeb_topics"])
             selected_links.update(
                 a.get("link")
                 for t in out["celeb_topics"]

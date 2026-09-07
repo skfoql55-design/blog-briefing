@@ -4,7 +4,7 @@ RSS 피드 + NAVER API HUB 뉴스 검색 API 에서 최근 기사를 모아
 data/raw-YYYY-MM-DD.json 으로 저장.
 LLM 을 전혀 쓰지 않으므로 토큰 비용 0.
 """
-import os, re, json, html, datetime as dt
+import os, re, json, html, csv, datetime as dt
 from concurrent.futures import ThreadPoolExecutor
 from email.utils import parsedate_to_datetime
 from urllib.parse import quote, urljoin, urlparse
@@ -14,6 +14,7 @@ import yaml, requests, feedparser
 KST = dt.timezone(dt.timedelta(hours=9))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UA = "Mozilla/5.0 (compatible; blog-briefing/1.0)"
+CREATOR_ADVISOR_PATH = os.path.join(ROOT, "data", "creator_advisor_keywords.csv")
 
 
 def clean(text: str) -> str:
@@ -142,26 +143,68 @@ def dedupe(articles):
     return out
 
 
+def load_creator_advisor_keywords(path, categories):
+    """크리에이터 어드바이저에서 옮겨 적은 검색어를 카테고리별로 읽는다."""
+    result = {key: [] for key in categories}
+    if not os.path.exists(path):
+        return result
+    labels = {
+        key: {key, str(value.get("label") or "").strip()}
+        for key, value in categories.items()
+    }
+    try:
+        with open(path, encoding="utf-8-sig", newline="") as f:
+            for row in csv.DictReader(f):
+                keyword = str(
+                    row.get("키워드") or row.get("keyword") or ""
+                ).strip()
+                target = str(
+                    row.get("카테고리키") or row.get("category_key") or
+                    row.get("카테고리") or row.get("category") or ""
+                ).strip()
+                if not keyword or not target:
+                    continue
+                for key, candidates in labels.items():
+                    if target in candidates or target == str(categories[key].get("category_name") or ""):
+                        if keyword not in result[key]:
+                            result[key].append(keyword)
+                        break
+    except (OSError, csv.Error):
+        pass
+    return result
+
+
 def main():
     cfg = yaml.safe_load(open(os.path.join(ROOT, "sources.yaml"), encoding="utf-8"))
     now = dt.datetime.now(KST)
     result = {"generated_at": now.isoformat(), "date": now.strftime("%Y-%m-%d"), "categories": {}}
+    advisor_keywords = load_creator_advisor_keywords(
+        CREATOR_ADVISOR_PATH, cfg.get("categories", {})
+    )
+    advisor_count = sum(len(values) for values in advisor_keywords.values())
+    if advisor_count:
+        print(f"크리에이터 어드바이저 검색어 {advisor_count}개를 추가합니다.")
 
     for key, cat in cfg["categories"].items():
         freshness_hours = cat.get("freshness_hours", cfg.get("freshness_hours", 30))
         cutoff = now - dt.timedelta(hours=freshness_hours)
         print(f"[{cat['label']}] 수집 시작")
         jobs = []
+        queries = list(cat.get("naver_queries", []))
+        for query in advisor_keywords.get(key, []):
+            if query not in queries:
+                queries.append(query)
         with ThreadPoolExecutor(max_workers=8) as pool:
             for url in cat.get("rss", []):
                 jobs.append(pool.submit(fetch_rss, url, cutoff))
-            for q in cat.get("naver_queries", []):
+            for q in queries:
                 jobs.append(pool.submit(fetch_naver, q, cutoff))
         articles = dedupe([a for j in jobs for a in j.result()])
         articles.sort(key=lambda a: a["published"] or "", reverse=True)
 
         block = {"label": cat["label"], "blog": cat.get("blog"),
-                 "category_name": cat.get("category_name"), "articles": articles}
+                 "category_name": cat.get("category_name"), "articles": articles,
+                 "creator_advisor_keywords": advisor_keywords.get(key, [])}
 
         celeb_cfg = cat.get("celeb")
         if celeb_cfg:

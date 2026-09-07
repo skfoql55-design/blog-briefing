@@ -170,6 +170,15 @@ categories:
       - "요리 식품 보관 안전 정보"
       - "청소 세탁 정리 생활 꿀팁"
       - "반려동물 육아 가족생활 정보"
+    shopping_insight:
+      category_name: "생활/건강"
+      category_code: "50000008"
+      keywords:
+        - "수납용품"
+        - "청소용품"
+        - "주방용품"
+        - "생활가전"
+        - "생활용품"
 
   cartech_auto:
     label: "카테크 · 자동차"
@@ -206,6 +215,15 @@ categories:
       - "노트북 태블릿 신제품"
       - "가전 기술 신제품"
       - "개인정보 보안 IT 이슈"
+    shopping_insight:
+      category_name: "디지털/가전"
+      category_code: "50000003"
+      keywords:
+        - "노트북"
+        - "스마트폰"
+        - "태블릿"
+        - "무선이어폰"
+        - "모니터"
 
   paleontology:
     label: "고생물"
@@ -266,6 +284,15 @@ categories:
       - "메이크업 헤어 네일 트렌드"
       - "뷰티 신제품 가격 비교"
       - "연예인 패션 공항패션 스타일"
+    shopping_insight:
+      category_name: "화장품/미용"
+      category_code: "50000002"
+      keywords:
+        - "스킨케어"
+        - "선크림"
+        - "쿠션"
+        - "샴푸"
+        - "립스틱"
 
 # 이미 쓴 글 제목 — 중복 회피용.
 # 프로젝트 루트의 past_titles.txt 에 한 줄에 하나씩 붙여넣으세요.

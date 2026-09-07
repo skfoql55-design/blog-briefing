@@ -47,7 +47,9 @@ def refresh_access_token():
 
 def send_text(access_token, text, link_url):
     if len(text) > LIMIT:
-        text = text[: LIMIT - 1] + "…"
+        suffix = f"\n{link_url}"
+        available = max(20, LIMIT - len(suffix) - 2)
+        text = text[:available] + "…" + suffix
     template = {
         "object_type": "text",
         "text": text,
@@ -95,11 +97,28 @@ def main():
     day_url = f"{site}/{date}.html"
 
     token = refresh_access_token()
-    message = (
-        "오늘의 브리핑 소식 보내드립니다.\n\n"
-        "아래 링크에서 확인해주세요.\n"
-        f"{day_url}"
-    )
+    candidates = []
+    for category in brief.get("categories", {}).values():
+        for topic in list(category.get("topics", [])) + list(category.get("celeb_topics", [])):
+            interest = topic.get("interest") or {}
+            try:
+                score = float(interest.get("score") or 0)
+            except (TypeError, ValueError):
+                score = 0
+            candidates.append((score, topic.get("topic", "")))
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    top_topics = [title for _, title in candidates if title][:3]
+    if top_topics:
+        lines = ["오늘의 브리핑 소식 보내드립니다.", "", "관심도 상위 주제"]
+        lines.extend(f"{index}. {title[:30]}" for index, title in enumerate(top_topics, 1))
+        lines.extend(["", "아래 링크에서 자세히 확인해주세요.", day_url])
+        message = "\n".join(lines)
+    else:
+        message = (
+            "오늘의 브리핑 소식 보내드립니다.\n\n"
+            "아래 링크에서 확인해주세요.\n"
+            f"{day_url}"
+        )
     all_ok = send_text(token, message, day_url)
 
     if not all_ok:
