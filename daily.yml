@@ -1,0 +1,69 @@
+name: 매일 블로그 브리핑
+
+on:
+  schedule:
+    # 21:50 UTC = 06:50 KST — 사이트 배포까지 끝나면 대략 07:00 에 카톡이 옵니다.
+    # GitHub Actions 는 부하에 따라 몇 분 늦을 수 있습니다.
+    - cron: "50 21 * * *"
+  workflow_dispatch:        # 버튼으로 수동 실행도 가능
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily-briefing
+  cancel-in-progress: false
+
+jobs:
+  briefing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: 1. 자료 수집
+        env:
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+        run: python scripts/collect.py
+
+      - name: 2. 주제 묶기와 요약
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: z-ai/glm-5.3-flash
+        run: python scripts/process.py
+
+      - name: 3. 작성 관리표 생성
+        run: python scripts/build_tracker.py
+
+      - name: 4. 사이트 생성
+        run: python scripts/build_site.py
+
+      - name: 5. 커밋 (브리핑·작성 관리표 보존)
+        run: |
+          git config user.name  "briefing-bot"
+          git config user.email "briefing-bot@users.noreply.github.com"
+          git add data docs
+          git diff --staged --quiet || git commit -m "브리핑 $(TZ=Asia/Seoul date +%Y-%m-%d)"
+          git push
+
+      - name: 6. Pages 반영 확인
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+        run: python scripts/wait_for_site.py
+
+      - name: 7. 카카오톡 알림
+        env:
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+        run: python scripts/notify_kakao.py
