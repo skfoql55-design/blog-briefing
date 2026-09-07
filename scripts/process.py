@@ -30,6 +30,7 @@ MAX_HEADLINES = 60
 TREND_URL = "https://naverapihub.apigw.ntruss.com/search-trend/v1/search"
 BLOG_URL = "https://naverapihub.apigw.ntruss.com/search/v1/blog"
 TITLE_PROMPT_FILE = os.path.join(ROOT, "prompts", "home_title_prompt.txt")
+RUNS_DIR = os.path.join(ROOT, "data", "runs")
 BLOG_API_AVAILABLE = None
 
 STOP = set("""기자 뉴스 종합 속보 단독 오늘 내일 올해 지난 대한 위해 관련 대해 통해 있다 없다
@@ -939,9 +940,18 @@ def main():
         print()
 
     path = os.path.join(ROOT, "data", f"brief-{date}.json")
+    run_id = dt.datetime.now(KST).strftime("%Y-%m-%d-%H%M%S")
+    brief["run_id"] = run_id
     with open(path, "w", encoding="utf-8") as f:
         json.dump(brief, f, ensure_ascii=False, indent=2)
     print(f"저장: {path}")
+
+    # 같은 날짜에 다시 실행해도 이전 결과가 사라지지 않도록 실행별 스냅샷을 보관한다.
+    os.makedirs(RUNS_DIR, exist_ok=True)
+    run_path = os.path.join(RUNS_DIR, f"brief-{run_id}.json")
+    with open(run_path, "w", encoding="utf-8") as f:
+        json.dump(brief, f, ensure_ascii=False, indent=2)
+    print(f"실행 기록 저장: {run_path}")
 
 
 if __name__ == "__main__":

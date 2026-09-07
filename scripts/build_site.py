@@ -15,6 +15,7 @@ KST = dt.timezone(dt.timedelta(hours=9))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCS = os.path.join(ROOT, "docs")
 TOPICS_DIR = os.path.join(DOCS, "topics")
+RUNS_DOCS_DIR = os.path.join(DOCS, "runs")
 WEEKDAY = ["월", "화", "수", "목", "금", "토", "일"]
 ACCENT = {
     "economy_kr_stock": "#1d6f5c",
@@ -225,6 +226,15 @@ def safe_href(url):
 def date_label(value):
     date = dt.datetime.strptime(value, "%Y-%m-%d")
     return f"{date.year}년 {date.month}월 {date.day}일 ({WEEKDAY[date.weekday()]})"
+
+
+def run_label(run_id, brief):
+    value = str(brief.get("generated_at") or "")
+    try:
+        generated = dt.datetime.fromisoformat(value)
+        return f"{date_label(brief['date'])} · {generated.strftime('%H:%M:%S')} 실행"
+    except ValueError:
+        return f"{date_label(brief['date'])} · {run_id} 실행"
 
 
 def topic_page_id(date, category_key, topic):
@@ -511,17 +521,82 @@ def render_day(brief, prev_date=None, next_date=None):
 </div>{CHECK_SCRIPT}</body></html>"""
 
 
-def render_archive(dates):
+def render_run_page(brief, run_id):
+    generated = dt.datetime.fromisoformat(brief["generated_at"]).strftime("%H:%M:%S")
+    body = []
+    for key, category in brief.get("categories", {}).items():
+        color = ACCENT.get(key, "#666")
+        parts = [
+            f'<section class="cat"><div class="cathead">'
+            f'<span class="dot" style="background:{color}"></span>'
+            f'<h2>{esc(category.get("label"))}</h2></div>'
+        ]
+        topics = category.get("topics") or []
+        if topics:
+            parts += [
+                render_topic(
+                    i + 1,
+                    topic,
+                    None,
+                    f'{run_id}:{key}:{topic_page_id(brief["date"], key, topic)}',
+                )
+                for i, topic in enumerate(topics)
+            ]
+        else:
+            parts.append('<p class="empty">이 실행에서는 선정된 주제가 없습니다.</p>')
+        if category.get("celeb_topics"):
+            parts.append('<p class="celebhead">연예인 건강 이슈</p>')
+            parts += [
+                render_topic(
+                    i + 1,
+                    topic,
+                    None,
+                    f'{run_id}:{key}:celeb:{topic_page_id(brief["date"], key, topic)}',
+                ).replace('class="topic"', 'class="topic celeb"')
+                for i, topic in enumerate(category["celeb_topics"])
+            ]
+        parts.append("</section>")
+        body.append("".join(parts))
+
+    checkbar = '<div class="checkbar"><strong data-check-summary>완료 0 / 전체 0</strong><span>이 실행 기록의 완료 표시는 이 브라우저에 저장됩니다.</span><button type="button" data-reset-checks>이 페이지 체크 지우기</button></div>'
+    return f"""<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{date_label(brief["date"])} {generated} 실행 기록</title><style>{CSS}</style></head><body><div class="wrap">
+<header class="top"><h1>브리핑 실행 기록</h1>
+<div class="date">{date_label(brief["date"])} · {generated} 실행</div>
+<nav class="nav"><a href="../">최신 브리핑</a><a href="../archive.html">날짜별 보관</a><a href="../tracker.html">작성 관리</a></nav></header>
+{checkbar}
+{"".join(body)}
+<footer>같은 날짜에 다시 실행된 브리핑도 이 페이지에서 확인할 수 있습니다.</footer>
+</div>{CHECK_SCRIPT}</body></html>"""
+
+
+def render_archive(dates, runs=None):
     items = []
     for value in dates:
         items.append(f'<li><a href="{value}.html">{date_label(value)}</a></li>')
+    run_items = []
+    for run_id, brief in (runs or []):
+        topic_count = sum(
+            len(block.get("topics", [])) + len(block.get("celeb_topics", []))
+            for block in brief.get("categories", {}).values()
+        )
+        run_items.append(
+            f'<li><a href="runs/{esc(run_id)}.html">{esc(run_label(run_id, brief))}</a>'
+            f' <span class="amet">· 주제 {topic_count}개</span></li>'
+        )
+    run_section = (
+        '<h2>실행 기록</h2><p class="date">같은 날짜에 다시 실행한 결과도 시간별로 보관됩니다.</p>'
+        f'<ul class="arch">{"".join(run_items) or "<li>아직 실행 기록이 없습니다.</li>"}</ul>'
+    )
     return f"""<!doctype html><html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>지난 브리핑</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>지난 브리핑</h1>
 <div class="date">{len(dates)}일치</div>
 <nav class="nav"><a href="./">최신으로</a><a href="tracker.html">작성 관리</a></nav></header>
-<ul class="arch">{"".join(items)}</ul></div></body></html>"""
+<h2>날짜별 브리핑</h2><ul class="arch">{"".join(items) or "<li>아직 날짜별 브리핑이 없습니다.</li>"}</ul>
+{run_section}</div></body></html>"""
 
 
 def render_tracker(rows):
@@ -558,6 +633,7 @@ def render_tracker(rows):
 def main():
     os.makedirs(DOCS, exist_ok=True)
     os.makedirs(TOPICS_DIR, exist_ok=True)
+    os.makedirs(RUNS_DOCS_DIR, exist_ok=True)
     files = sorted(glob.glob(os.path.join(ROOT, "data", "brief-*.json")))
     if not files:
         print("brief-*.json 이 없습니다. process.py 를 먼저 돌리세요.")
@@ -588,7 +664,16 @@ def main():
                 f.write(html)
 
     with open(os.path.join(DOCS, "archive.html"), "w", encoding="utf-8") as f:
-        f.write(render_archive(list(reversed(dates))))
+        run_files = sorted(glob.glob(os.path.join(ROOT, "data", "runs", "brief-*.json")), reverse=True)
+        runs = []
+        for run_path in run_files:
+            with open(run_path, encoding="utf-8") as run_file:
+                run_brief = json.load(run_file)
+            run_id = run_brief.get("run_id") or os.path.basename(run_path)[6:-5]
+            runs.append((run_id, run_brief))
+            with open(os.path.join(RUNS_DOCS_DIR, f"{run_id}.html"), "w", encoding="utf-8") as run_html:
+                run_html.write(render_run_page(run_brief, run_id))
+        f.write(render_archive(list(reversed(dates)), runs))
 
     tracker_path = os.path.join(ROOT, "data", "editorial_tracker.csv")
     if os.path.exists(tracker_path):
