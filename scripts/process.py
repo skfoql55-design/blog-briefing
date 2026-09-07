@@ -35,6 +35,24 @@ TITLE_PROMPT_FILE = os.path.join(ROOT, "prompts", "home_title_prompt.txt")
 RUNS_DIR = os.path.join(ROOT, "data", "runs")
 BLOG_API_AVAILABLE = None
 CELEBRITY_PROFILE_FIELDS = ("나이", "혈액형", "MBTI", "고향", "학력", "재산", "활동")
+CELEBRITY_KEYWORD_CATEGORIES = {
+    "경제": ("출연료", "광고료", "수입", "재산", "투자"),
+    "리빙": ("집", "인테리어", "생활 습관", "반려동물", "취미 공간"),
+    "패션": ("공항패션", "착장", "옷", "브랜드", "스타일"),
+    "패션뷰티": ("최근 얼굴 공개", "피부 관리", "헤어스타일", "메이크업", "화보"),
+    "카테크·IT": ("자동차", "전기차", "차량", "스마트폰", "디지털 기기"),
+    "건강": ("과거 몸무게", "운동 방법", "식단", "다이어트", "건강 관리"),
+    "방송연예": ("최근 작품", "차기작", "출연작", "인터뷰", "근황"),
+    "취향·여행": ("여행", "맛집", "취미", "책", "음악"),
+}
+
+
+def default_celebrity_keyword_ideas(name):
+    name = str(name or "연예인").strip()
+    return {
+        category: [f"{name} {keyword}" for keyword in keywords]
+        for category, keywords in CELEBRITY_KEYWORD_CATEGORIES.items()
+    }
 
 STOP = set("""기자 뉴스 종합 속보 단독 오늘 내일 올해 지난 대한 위해 관련 대해 통해 있다 없다
 그리고 하지만 이번 지난해 우리 국내 이날 대비 중인 것으로 밝혔다 전했다 나타났다""".split())
@@ -219,6 +237,7 @@ def default_landing(label, topic, basis, articles):
         result["celebrity_profile"] = {
             "name": "",
             "query_keywords": ["프로필", "나이", "혈액형", "MBTI", "고향", "학력", "재산"],
+            "category_keyword_ideas": default_celebrity_keyword_ideas(topic),
             "fields": {
                 field: {
                     "value": "",
@@ -324,6 +343,7 @@ def normalize_landing(label, topic, basis, articles, value):
             "name": str(raw_profile.get("name") or "").strip(),
             "query_keywords": [],
             "fields": {},
+            "category_keyword_ideas": {},
         }
         raw_keywords = raw_profile.get("query_keywords") or []
         if isinstance(raw_keywords, list):
@@ -348,6 +368,19 @@ def normalize_landing(label, topic, basis, articles, value):
                     "status": status,
                     "source_article_ids": refs[:3],
                 }
+        raw_ideas = raw_profile.get("category_keyword_ideas") or {}
+        if isinstance(raw_ideas, dict):
+            for category, values in raw_ideas.items():
+                if not isinstance(values, list):
+                    continue
+                clean_values = list(dict.fromkeys(
+                    str(item).strip() for item in values if str(item).strip()
+                ))[:8]
+                if clean_values:
+                    profile["category_keyword_ideas"][str(category).strip()] = clean_values
+        default_ideas = default_celebrity_keyword_ideas(profile["name"] or topic)
+        for category, values in default_ideas.items():
+            profile["category_keyword_ideas"].setdefault(category, values)
         if profile["name"] or profile["fields"]:
             result["celebrity_profile"] = profile
     return result
@@ -470,6 +503,9 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
     "fields"에는 나이·혈액형·MBTI·고향·학력·재산·활동을 넣는다.
     각 필드는 {"value":"...","status":"기사 확인|공식 확인 필요|미공개·확인 필요","source_article_ids":[0]} 형식으로 쓴다.
     제공된 기사에 근거가 없는 프로필 값은 만들지 말고 빈 값과 "미공개·확인 필요"로 표시한다.
+    "category_keyword_ideas"에는 경제, 리빙, 패션, 패션뷰티, 카테크·IT, 건강, 방송연예, 취향·여행 등
+    카테고리별로 이 인물명으로 검색할 키워드 3~5개를 넣는다. 출연료·재산·몸무게처럼 민감하거나
+    확인이 필요한 키워드는 아이디어로만 제시하고 사실로 단정하지 않는다.
 
 기사 묶음 규칙:
 - 기사 URL이 서로 달라야 한다.

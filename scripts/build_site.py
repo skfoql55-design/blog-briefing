@@ -476,6 +476,29 @@ def render_celebrity_blog_references(topic):
     )
 
 
+def render_celebrity_keyword_ideas(topic):
+    profile = ((topic.get("landing") or {}).get("celebrity_profile") or {})
+    ideas = profile.get("category_keyword_ideas") or {}
+    if not ideas:
+        return ""
+    rows = []
+    for category, keywords in ideas.items():
+        links = []
+        for keyword in keywords[:8]:
+            links.append(
+                f'<a class="chip" href="{safe_href(naver_blog_search_url(keyword))}" '
+                f'target="_blank" rel="noopener">{esc(keyword)}</a>'
+            )
+        rows.append(
+            f'<tr><th>{esc(category)}</th><td><div class="chips">{"".join(links)}</div></td></tr>'
+        )
+    return (
+        '<section class="detail-section"><h3>카테고리별 연예인 키워드 추천</h3>'
+        '<p class="method-note">키워드를 누르면 네이버 블로그 검색으로 이동합니다. 출연료·재산·몸무게 등은 공식 공개 자료가 있을 때만 본문 근거로 사용하세요.</p>'
+        f'<div class="table-scroll"><table class="comparison"><thead><tr><th>카테고리</th><th>추천 검색 키워드</th></tr></thead><tbody>{"".join(rows)}</tbody></table></div></section>'
+    )
+
+
 def render_topic(idx, topic, detail_href=None, check_id=None):
     arts = "".join(
         f'<li><a href="{safe_href(article.get("link"))}" target="_blank" rel="noopener">'
@@ -567,6 +590,7 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
     )
     celebrity_profile_block = render_celebrity_profile(topic) if is_celeb else ""
     celebrity_blog_block = render_celebrity_blog_references(topic) if is_celeb else ""
+    celebrity_keyword_block = render_celebrity_keyword_ideas(topic) if is_celeb else ""
     completion = render_completion_control(f"{date}:{page_id}")
     return f"""<!doctype html><html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -584,6 +608,7 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
 <section class="detail-section"><h3>관련 기사 3개</h3><div class="sources">{"".join(source_cards)}</div></section>
 <section class="detail-section"><h3>기사 3개 비교표</h3><p class="method-note">아래 요약은 수집된 기사 정보이며, 발행 전에는 각 원문을 직접 확인하세요.</p>{render_article_comparison(topic.get("articles", []))}</section>
 {celebrity_profile_block}
+{celebrity_keyword_block}
 {celebrity_blog_block}
 <section class="detail-section"><h3>블로그 글 구성안</h3>{render_list(structure, ordered=True)}</section>
 <section class="detail-section"><h3>홈판 제목 추천 30개</h3>
@@ -862,7 +887,8 @@ def render_celebrity_dashboard(brief):
                 f'{render_completion_control(check_id)}'
                 f'<div class="ttitle">{esc(name)}</div><p class="tbasis">{esc(topic.get("topic"))}</p>'
                 f'<a class="detail-link" href="topics/{esc(page_id)}.html">기사·프로필·참고글 상세 보기 →</a>'
-                f'{render_celebrity_profile(topic)}{render_celebrity_blog_references(topic)}</article>'
+                f'{render_celebrity_profile(topic)}{render_celebrity_keyword_ideas(topic)}'
+                f'{render_celebrity_blog_references(topic)}</article>'
             )
     content = "".join(cards) or '<p class="empty">현재 연예인 정보 주제가 없습니다.</p>'
     return f"""<!doctype html><html lang="ko"><head>
