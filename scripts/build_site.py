@@ -22,12 +22,16 @@ ACCENT = {
     "economy_us_stock": "#256d8a",
     "economy_finance": "#3f7d5a",
     "economy_policy": "#7a5b2b",
+    "economy_property": "#8a5a44",
     "health_current": "#a33a5b",
     "health_info": "#c06a3a",
+    "living": "#6b7d3e",
     "cartech_auto": "#2f5b9c",
     "cartech_it": "#5a55a5",
+    "paleontology": "#7c6650",
     "broadcast": "#8a4f9d",
     "sports": "#b36b00",
+    "fashion_beauty": "#b04e78",
 }
 
 CSS = """
@@ -97,6 +101,17 @@ footer a{color:var(--muted)}
 .tracker th,.tracker td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .tracker th{color:var(--muted);font-weight:600;white-space:nowrap}
 .tracker a{color:var(--ink)}
+.dashboard-tools{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.dashboard-tools input,.dashboard-tools select{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit;font-size:.82rem}
+.category-table{width:100%;border-collapse:collapse;font-size:.78rem;background:var(--card);border:1px solid var(--line)}
+.category-table th,.category-table td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.category-table th{color:var(--muted);font-weight:600;white-space:nowrap}
+.category-table a{color:var(--ink);font-weight:600;text-decoration:none}
+.category-table a:hover{text-decoration:underline}
+.tag{display:inline-block;background:var(--chip);border-radius:99px;padding:2px 7px;color:var(--muted);font-size:.7rem;white-space:nowrap}
+.dashboard-check{white-space:nowrap;color:var(--muted);font-size:.75rem}
+.dashboard-check input{accent-color:#3b8f5b}
+@media (max-width:700px){.category-table{display:block;overflow-x:auto;white-space:nowrap}.category-table td.topic-cell{white-space:normal;min-width:230px}}
 .status{white-space:nowrap;font-weight:600}
 .detail-link{display:inline-block;margin:2px 0 10px;color:var(--muted);font-size:.78rem;text-decoration:none}
 .detail-link:hover{color:var(--ink)}
@@ -235,6 +250,55 @@ def run_label(run_id, brief):
         return f"{date_label(brief['date'])} · {generated.strftime('%H:%M:%S')} 실행"
     except ValueError:
         return f"{date_label(brief['date'])} · {run_id} 실행"
+
+
+CATEGORY_TAXONOMY = {
+    "economy_kr_stock": ("경제", "한국 주식"),
+    "economy_us_stock": ("경제", "미국 주식"),
+    "economy_finance": ("경제", "재테크"),
+    "economy_policy": ("경제", "한국 정책 이슈"),
+    "economy_property": ("경제", "부동산"),
+    "health_current": ("건강", "최신 건강 이슈"),
+    "health_info": ("건강", "생활 건강 정보"),
+    "health_celebrity": ("건강", "연예인 건강"),
+    "living": ("리빙", "생활 꿀팁"),
+    "cartech_auto": ("카테크·IT", "자동차"),
+    "cartech_it": ("카테크·IT", "컴퓨터·IT"),
+    "paleontology": ("고생물", "공룡·화석·고대 생명"),
+    "broadcast": ("방송연예", "드라마·예능·OTT"),
+    "sports": ("스포츠", "국내·해외 스포츠"),
+    "fashion_beauty": ("패션뷰티", "패션·뷰티"),
+}
+
+
+def category_info(category_key, category):
+    if category_key in CATEGORY_TAXONOMY:
+        return CATEGORY_TAXONOMY[category_key]
+    label = str(category.get("label") or category_key)
+    if "·" in label:
+        parent, child = [part.strip() for part in label.split("·", 1)]
+        return parent, child
+    return label, str(category.get("category_name") or label)
+
+
+def topic_content_type(topic, category_key):
+    value = str(topic.get("content_type") or "").strip()
+    if value:
+        return value
+    text = " ".join([
+        str(topic.get("topic") or ""),
+        str(topic.get("basis") or ""),
+        str(category_key or ""),
+    ]).lower()
+    if any(word in text for word in ("리콜", "보안", "개인정보", "사기", "위험", "결함", "안전")):
+        return "주의·안전"
+    if any(word in text for word in ("방법", "꿀팁", "관리", "설정", "확인법", "습관", "체크")):
+        return "꿀팁·실행"
+    if any(word in text for word in ("비교", "가격", "구매", "추천", "중고차", "제품")):
+        return "비교·구매"
+    if any(word in text for word in ("정책", "발표", "시행", "이슈", "변경", "결과", "신작", "경기")):
+        return "뉴스·변경"
+    return "뉴스·정보"
 
 
 def topic_page_id(date, category_key, topic):
@@ -498,6 +562,7 @@ def render_day(brief, prev_date=None, next_date=None):
     nav = [
         '<a href="./">최신</a>',
         '<a href="archive.html">지난 브리핑</a>',
+        '<a href="category.html">카테고리별</a>',
         '<a href="tracker.html">작성 관리</a>',
     ]
     if prev_date:
@@ -564,7 +629,7 @@ def render_run_page(brief, run_id):
 <title>{date_label(brief["date"])} {generated} 실행 기록</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>브리핑 실행 기록</h1>
 <div class="date">{date_label(brief["date"])} · {generated} 실행</div>
-<nav class="nav"><a href="../">최신 브리핑</a><a href="../archive.html">날짜별 보관</a><a href="../tracker.html">작성 관리</a></nav></header>
+<nav class="nav"><a href="../">최신 브리핑</a><a href="../archive.html">날짜별 보관</a><a href="../category.html">카테고리별</a><a href="../tracker.html">작성 관리</a></nav></header>
 {checkbar}
 {"".join(body)}
 <footer>같은 날짜에 다시 실행된 브리핑도 이 페이지에서 확인할 수 있습니다.</footer>
@@ -594,9 +659,77 @@ def render_archive(dates, runs=None):
 <title>지난 브리핑</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>지난 브리핑</h1>
 <div class="date">{len(dates)}일치</div>
-<nav class="nav"><a href="./">최신으로</a><a href="tracker.html">작성 관리</a></nav></header>
+<nav class="nav"><a href="./">최신으로</a><a href="category.html">카테고리별</a><a href="tracker.html">작성 관리</a></nav></header>
 <h2>날짜별 브리핑</h2><ul class="arch">{"".join(items) or "<li>아직 날짜별 브리핑이 없습니다.</li>"}</ul>
 {run_section}</div></body></html>"""
+
+
+def render_category_dashboard(brief, tracker_rows=None):
+    tracker_map = {row.get("topic_id"): row for row in (tracker_rows or []) if row.get("topic_id")}
+    rows = []
+    category_options = []
+    seen_categories = set()
+    for category_key, category in brief.get("categories", {}).items():
+        parent, subcategory = category_info(category_key, category)
+        if parent not in seen_categories:
+            category_options.append(parent)
+            seen_categories.add(parent)
+        all_topics = [(topic, "일반") for topic in category.get("topics", [])]
+        all_topics += [(topic, "연예인 건강") for topic in category.get("celeb_topics", [])]
+        for topic, section in all_topics:
+            page_id = topic_page_id(brief["date"], category_key, topic)
+            topic_id = topic.get("topic_id") or page_id
+            tracker = tracker_map.get(topic_id, {})
+            written = tracker.get("작성 여부") or "미작성"
+            published = tracker.get("발행 여부") or "미발행"
+            content_type = topic_content_type(topic, category_key)
+            row_subcategory = "연예인 건강" if section == "연예인 건강" else subcategory
+            search_text = " ".join([
+                parent, row_subcategory, section, content_type,
+                str(topic.get("topic") or ""), str(topic.get("basis") or ""),
+            ])
+            rows.append(
+                f'<tr data-parent="{esc(parent)}" data-search="{esc(search_text.lower())}">'
+                f'<td>{esc(parent)}</td><td><span class="tag">{esc(row_subcategory)}</span>'
+                f'<br><span class="amet">{esc(section)}</span></td>'
+                f'<td><span class="tag">{esc(content_type)}</span></td>'
+                f'<td class="topic-cell"><a href="topics/{esc(page_id)}.html">{esc(topic.get("topic"))}</a>'
+                f'<br><span class="amet">{esc(topic.get("basis"))}</span></td>'
+                f'<td class="status">{esc(written)}<br>{esc(published)}</td>'
+                f'<td class="dashboard-check"><label><input class="topic-check" type="checkbox" '
+                f'data-topic-id="{esc(brief["date"] + ":" + page_id)}"> 완료</label></td></tr>'
+            )
+    options = ''.join(f'<option value="{esc(value)}">{esc(value)}</option>' for value in category_options)
+    return f"""<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>카테고리별 블로그 브리핑</title><style>{CSS}</style></head><body><div class="wrap">
+<header class="top"><h1>카테고리별 블로그 브리핑</h1>
+<div class="date">{date_label(brief["date"])} · 오늘 주제 {len(rows)}개</div>
+<nav class="nav"><a href="./">오늘의 브리핑</a><a href="archive.html">날짜별 보관</a><a href="tracker.html">작성 관리</a></nav></header>
+<div class="dashboard-tools"><select id="parent-filter"><option value="">전체 대분류</option>{options}</select>
+<input id="topic-search" type="search" placeholder="주제·세부 카테고리 검색"></div>
+<p class="date">세부 카테고리와 콘텐츠 유형을 확인하고, 상세 조사·작성 상태를 한눈에 관리할 수 있습니다.</p>
+<table class="category-table"><thead><tr><th>대분류</th><th>세부 카테고리</th><th>콘텐츠 유형</th><th>주제</th><th>작성·발행</th><th>완료</th></tr></thead>
+<tbody id="category-rows">{"".join(rows) or '<tr><td colspan="6">오늘 주제가 없습니다.</td></tr>'}</tbody></table>
+<footer>완료 체크는 이 브라우저에 저장됩니다. 작성·발행 상태를 여러 기기에서 유지하려면 작성 관리표를 수정해 커밋하세요.</footer>
+</div>{CHECK_SCRIPT}<script>
+(() => {{
+  const filter = document.getElementById('parent-filter');
+  const search = document.getElementById('topic-search');
+  const rows = [...document.querySelectorAll('#category-rows tr[data-parent]')];
+  const apply = () => {{
+    const parent = filter.value;
+    const query = search.value.trim().toLowerCase();
+    rows.forEach(row => {{
+      const matchesParent = !parent || row.dataset.parent === parent;
+      const matchesSearch = !query || (row.dataset.search || '').includes(query);
+      row.style.display = matchesParent && matchesSearch ? '' : 'none';
+    }});
+  }};
+  filter.addEventListener('change', apply);
+  search.addEventListener('input', apply);
+}})();
+</script></body></html>"""
 
 
 def render_tracker(rows):
@@ -622,7 +755,7 @@ def render_tracker(rows):
 <title>블로그 작성 관리</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>블로그 작성 관리</h1>
 <div class="date">Excel 또는 Google Sheets에서 editorial_tracker.csv를 수정하세요.</div>
-<nav class="nav"><a href="./">최신 브리핑</a><a href="archive.html">지난 브리핑</a>
+<nav class="nav"><a href="./">최신 브리핑</a><a href="archive.html">지난 브리핑</a><a href="category.html">카테고리별</a>
 <a href="editorial_tracker.csv">CSV 내려받기</a></nav></header>
 <table class="tracker"><thead><tr><th>날짜</th><th>카테고리</th><th>주제</th>
 <th>작성 여부</th><th>발행 여부</th><th>발행 URL</th></tr></thead>
@@ -676,11 +809,18 @@ def main():
         f.write(render_archive(list(reversed(dates)), runs))
 
     tracker_path = os.path.join(ROOT, "data", "editorial_tracker.csv")
+    tracker_rows = []
     if os.path.exists(tracker_path):
         with open(tracker_path, encoding="utf-8-sig", newline="") as f:
             rows = list(csv.DictReader(f))
+        tracker_rows = rows
         with open(os.path.join(DOCS, "tracker.html"), "w", encoding="utf-8") as f:
             f.write(render_tracker(rows))
+
+    with open(files[-1], encoding="utf-8") as f:
+        latest_brief = json.load(f)
+    with open(os.path.join(DOCS, "category.html"), "w", encoding="utf-8") as f:
+        f.write(render_category_dashboard(latest_brief, tracker_rows))
 
     with open(os.path.join(DOCS, ".nojekyll"), "w", encoding="utf-8") as f:
         f.write("")
