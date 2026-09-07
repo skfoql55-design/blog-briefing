@@ -108,11 +108,13 @@ def fallback_top_n_judgment(label):
     }
 
 
-def fallback_headline_metadata(headlines):
+def fallback_headline_metadata(headlines, label=""):
+    news_labels = ("정책", "리콜", "최신 이슈", "방송연예", "스포츠", "뉴스")
+    frame = "뉴스·변경형" if any(word in str(label or "") for word in news_labels) else "실행형"
     return [
         {
             "title": title,
-            "frame": "정보형",
+            "frame": frame,
             "source_article_ids": [],
             "evidence_status": "원문 확인 필요",
         }
@@ -186,7 +188,7 @@ def default_landing(label, topic, basis, articles):
         ],
         "top_n_judgment": fallback_top_n_judgment(label),
         "headline_options": headlines,
-        "headline_metadata": fallback_headline_metadata(headlines),
+        "headline_metadata": fallback_headline_metadata(headlines, label),
         "keywords": [topic],
         "internal_link_ideas": [],
         "cautions": cautions,
@@ -266,7 +268,10 @@ def normalize_landing(label, topic, basis, articles, value):
                 existing.append(item)
                 existing_meta.append({
                     "title": item,
-                    "frame": "정보형",
+                    "frame": "뉴스·변경형" if any(
+                        word in str(label or "")
+                        for word in ("정책", "리콜", "최신 이슈", "방송연예", "스포츠", "뉴스")
+                    ) else "실행형",
                     "source_article_ids": [],
                     "evidence_status": "원문 확인 필요",
                 })
@@ -395,6 +400,7 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
 
 기사 묶음 규칙:
 - 기사 URL이 서로 달라야 한다.
+- 같은 사건·정책·발표를 다룬 기사 {per}개는 하나의 글감과 하나의 블로그 주제 근거로 유지한다. 기사별로 쪼개지 않는다.
 - 같은 통신사 보도자료를 복사한 기사만 3개 고르지 말고, 서로 다른 출처 도메인 3개를 우선한다.
 - 같은 사건을 다루되 발표, 수치, 일정, 영향 등 서로 다른 정보가 있는 기사를 우선한다.
 - 기사 요약문에 없는 사실이나 숫자를 만들지 않는다.
@@ -410,6 +416,8 @@ PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편�
 - "이 번호", "이 돈", "이것"처럼 가린 표현은 브리프 안에 실제 답이 있을 때만 사용한다.
 - 숫자만으로 대조 항목이 부족하면 TOP N을 쓰지 않는다.
 - 뉴스·정책·리콜은 필요하면 TOP N 대신 뉴스·변경형 제목을 우선한다.
+- RSS 제목·검색 결과 요약만 근거로 삼은 제목은 `원문 확인 필요`로 표시하고, 원문이나 공식 자료를 실제로 받은 경우에만 `확정 팩트 기반`으로 표시한다.
+- `source_article_ids`는 입력 기사 배열의 0부터 시작하는 번호를 사용한다.
 - 아래 '이미 쓴 글' 및 '이번 실행에서 이미 고른 주제'와 겹치면 고르지 않는다.
 - 광고성 기사, 단순 인사·행사 기사는 제외한다.
 
