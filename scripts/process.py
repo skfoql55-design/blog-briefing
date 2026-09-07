@@ -207,6 +207,7 @@ def naive_cluster(articles, max_topics, per_topic, min_sources=2, label=""):
 PROMPT = """너는 네이버 블로그 정보성 글의 주제를 고르는 편집자다.
 
 아래는 오늘 '{label}' 분야에 올라온 기사 목록이다.
+이 분야의 편집 방향은 다음과 같다: {focus}
 같은 사건이나 흐름을 다루면서도 서로 다른 정보가 있는 기사 {per}개를 한 묶음으로 만들어,
 블로그 글로 쓸 주제 {n}개를 골라라.
 
@@ -259,7 +260,7 @@ def extract_json_array(text):
     return value
 
 
-def ask_llm(label, articles, n, per, past_titles, min_sources):
+def ask_llm(label, articles, n, per, past_titles, min_sources, focus=""):
     key = os.getenv("OPENROUTER_API_KEY")
     if not key:
         return None
@@ -276,6 +277,7 @@ def ask_llm(label, articles, n, per, past_titles, min_sources):
 
     prompt = PROMPT.format(
         label=label,
+        focus=focus or "제공된 기사에서 독자에게 가장 유용한 세부 주제를 찾는다.",
         n=n,
         per=per,
         past_block=past_block,
@@ -398,13 +400,13 @@ def fill_up(topics, articles, n, per, min_sources, blocked=()):
     return topics + extra
 
 
-def build(label, articles, n, per, min_sources, past_titles, excluded_links=()):
+def build(label, articles, n, per, min_sources, past_titles, excluded_links=(), focus=""):
     excluded = set(excluded_links)
     articles = [a for a in articles if a.get("link") not in excluded]
     if len(articles) < per:
         return []
     blocked = set(excluded)
-    topics = ask_llm(label, articles, n, per, past_titles, min_sources)
+    topics = ask_llm(label, articles, n, per, past_titles, min_sources, focus)
     if topics is None:
         topics = naive_cluster(articles, n * 3, per, min_sources, label=label)
     topics = [t for t in topics if usable_topic(t, per, min_sources)]
@@ -453,6 +455,7 @@ def main():
             min_sources,
             past_titles + selected_titles,
             selected_links,
+            category_cfg.get("focus", ""),
         )
         selected_links.update(a.get("link") for t in topics for a in t["articles"] if a.get("link"))
         selected_titles.extend(t["topic"] for t in topics)
@@ -482,6 +485,7 @@ def main():
                 celeb_min_sources,
                 past_titles + selected_titles,
                 selected_links,
+                celeb_cfg.get("focus", "연예인의 건강 공개·회복·생활 습관 관련 이슈"),
             )
             selected_links.update(
                 a.get("link")

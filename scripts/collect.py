@@ -145,10 +145,11 @@ def dedupe(articles):
 def main():
     cfg = yaml.safe_load(open(os.path.join(ROOT, "sources.yaml"), encoding="utf-8"))
     now = dt.datetime.now(KST)
-    cutoff = now - dt.timedelta(hours=cfg.get("freshness_hours", 30))
     result = {"generated_at": now.isoformat(), "date": now.strftime("%Y-%m-%d"), "categories": {}}
 
     for key, cat in cfg["categories"].items():
+        freshness_hours = cat.get("freshness_hours", cfg.get("freshness_hours", 30))
+        cutoff = now - dt.timedelta(hours=freshness_hours)
         print(f"[{cat['label']}] 수집 시작")
         jobs = []
         with ThreadPoolExecutor(max_workers=8) as pool:

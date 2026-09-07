@@ -5,7 +5,7 @@
 
 ```
 06:50  GitHub Actions 시작
-       ├ RSS + NAVER API HUB 뉴스 검색으로 최근 30시간 기사 수집
+       ├ RSS + NAVER API HUB 뉴스 검색으로 분야별 최신 기사 수집
        ├ GLM-5.3-Flash 로 같은 사건끼리 묶고 주제·근거 생성
        │  └ 주제 1개당 서로 다른 관련 기사 3개, 서로 다른 3개 출처 확인
        ├ 이미 쓴 글(past_titles.txt)과 겹치는 주제 제외
@@ -145,8 +145,17 @@ python scripts/get_kakao_token.py <REST_API_키> <클라이언트_시크릿>
 글 구성안, 제목 후보와 검색 키워드가 들어갑니다. 확인되지 않은 대상·수치·일정은
 랜딩페이지의 작성 전 확인 영역에서 원문 확인 대상으로 표시합니다.
 
-기본으로 경제·건강·카테크·방송연예·스포츠는 카테고리별 5개 주제를 만들고,
-건강 안에는 일반 건강 5개와 연예인 건강 3개를 별도 섹션으로 만듭니다.
+기본으로 다음 세부 카테고리에서 각각 5개 주제를 만듭니다.
+
+- 경제: 한국 주식 5개, 미국 주식 5개, 재테크 5개, 한국 정책 이슈 5개
+- 건강: 최신 이슈 5개, 생활 건강 정보 5개, 연예인 건강 3개
+- 카테크: 자동차 5개, IT 5개
+- 방송연예 5개, 스포츠 5개
+
+각 주제에는 서로 다른 관련 기사 3개와 서로 다른 출처 3개를 연결합니다.
+브리핑 페이지의 `완료 표시`를 누르면 해당 주제가 완료 상태로 보이고, 같은 브라우저의 저장공간에 남습니다.
+브라우저나 저장공간을 바꾸면 체크 상태도 바뀌므로, 장기 관리 상태는 `editorial_tracker.csv`의
+`작성 여부`와 `발행 여부`에 함께 기록하세요.
 기사 3개와 서로 다른 3개 출처를 확보하지 못한 주제는 억지로 채우지 않고 제외합니다.
 
 ---
@@ -160,8 +169,8 @@ python scripts/get_kakao_token.py <REST_API_키> <클라이언트_시크릿>
 | 하루 주제 개수 | `sources.yaml` → `topics_per_category` |
 | 카테고리별 주제 개수 | `sources.yaml` → 각 카테고리의 `topics_per_category` |
 | 한 주제당 기사 수 | `sources.yaml` → `articles_per_topic` |
-| 며칠치를 최신으로 볼지 | `sources.yaml` → `freshness_hours` |
-| 연예인 이슈 키워드 | `sources.yaml` → `health.celeb.naver_queries` |
+| 며칠치를 최신으로 볼지 | `sources.yaml` → 기본 또는 카테고리별 `freshness_hours` |
+| 연예인 이슈 키워드 | `sources.yaml` → `health_current.celeb.naver_queries` |
 | 발송 시각 | `.github/workflows/daily.yml` → `cron` (UTC 기준, KST −9시간) |
 | 주제 뽑는 기준·말투 | `scripts/process.py` → `PROMPT` |
 | 사이트 디자인 | `scripts/build_site.py` → `CSS` |

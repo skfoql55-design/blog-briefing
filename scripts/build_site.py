@@ -17,9 +17,14 @@ DOCS = os.path.join(ROOT, "docs")
 TOPICS_DIR = os.path.join(DOCS, "topics")
 WEEKDAY = ["월", "화", "수", "목", "금", "토", "일"]
 ACCENT = {
-    "economy": "#1d6f5c",
-    "health": "#a33a5b",
-    "cartech": "#2f5b9c",
+    "economy_kr_stock": "#1d6f5c",
+    "economy_us_stock": "#256d8a",
+    "economy_finance": "#3f7d5a",
+    "economy_policy": "#7a5b2b",
+    "health_current": "#a33a5b",
+    "health_info": "#c06a3a",
+    "cartech_auto": "#2f5b9c",
+    "cartech_it": "#5a55a5",
     "broadcast": "#8a4f9d",
     "sports": "#b36b00",
 }
@@ -54,9 +59,20 @@ section.cat{margin-bottom:38px}
 .catmeta{color:var(--muted);font-size:.78rem;margin:0 0 16px 19px}
 .topic{background:var(--card);border:1px solid var(--line);border-radius:12px;
   padding:15px 17px;margin-bottom:11px}
+.topic.completed{border-color:#76a987;background:linear-gradient(90deg,var(--card),rgba(118,169,135,.08))}
+.topic.completed .ttitle{color:var(--muted)}
 .tnum{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .ttitle{font-size:1rem;font-weight:600;margin:3px 0 6px;letter-spacing:-.01em}
 .tbasis{font-size:.87rem;color:var(--muted);margin:0 0 11px}
+.topic-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 7px}
+.complete-toggle{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.78rem;cursor:pointer;user-select:none}
+.complete-toggle input{width:16px;height:16px;accent-color:#3b8f5b;cursor:pointer}
+.complete-note{color:var(--muted);font-size:.72rem}
+.checkbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin:0 0 18px;font-size:.8rem;color:var(--muted)}
+.checkbar strong{color:var(--ink)}
+.checkbar button{border:1px solid var(--line);background:var(--chip);color:var(--muted);border-radius:7px;padding:5px 9px;cursor:pointer}
+.checkbar button:hover{color:var(--ink)}
 .arts{list-style:none;margin:0;padding:11px 0 0;border-top:1px dashed var(--line)}
 .arts li{margin-bottom:7px;font-size:.83rem;line-height:1.5}
 .arts li:last-child{margin-bottom:0}
@@ -99,6 +115,53 @@ footer a{color:var(--muted)}
 .back{margin-bottom:16px;font-size:.82rem}
 .back a{color:var(--muted);text-decoration:none}
 """
+
+CHECK_SCRIPT = """<script>
+(() => {
+  const storageKey = 'blogBriefingCompletedTopics';
+  const read = () => {
+    try { return JSON.parse(localStorage.getItem(storageKey) || '{}'); }
+    catch (_) { return {}; }
+  };
+  const write = (value) => {
+    try { localStorage.setItem(storageKey, JSON.stringify(value)); }
+    catch (_) {}
+  };
+  const refresh = () => {
+    const saved = read();
+    let done = 0;
+    document.querySelectorAll('.topic-check').forEach((input) => {
+      const checked = Boolean(saved[input.dataset.topicId]);
+      input.checked = checked;
+      const card = input.closest('.topic');
+      if (card) card.classList.toggle('completed', checked);
+      if (checked) done += 1;
+    });
+    document.querySelectorAll('[data-check-summary]').forEach((el) => {
+      el.textContent = `완료 ${done} / 전체 ${document.querySelectorAll('.topic-check').length}`;
+    });
+  };
+  document.querySelectorAll('.topic-check').forEach((input) => {
+    input.addEventListener('change', () => {
+      const saved = read();
+      if (input.checked) saved[input.dataset.topicId] = true;
+      else delete saved[input.dataset.topicId];
+      write(saved);
+      refresh();
+    });
+  });
+  document.querySelectorAll('[data-reset-checks]').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!window.confirm('이 페이지의 완료 표시를 모두 지울까요?')) return;
+      const saved = read();
+      document.querySelectorAll('.topic-check').forEach((input) => delete saved[input.dataset.topicId]);
+      write(saved);
+      refresh();
+    });
+  });
+  refresh();
+})();
+</script>"""
 
 
 def esc(value):
@@ -149,7 +212,7 @@ def render_list(items, ordered=False):
     return f"<{tag}>" + "".join(f"<li>{esc(item)}</li>" for item in items) + f"</{tag}>"
 
 
-def render_topic(idx, topic, detail_href=None):
+def render_topic(idx, topic, detail_href=None, check_id=None):
     arts = "".join(
         f'<li><a href="{safe_href(article.get("link"))}" target="_blank" rel="noopener">'
         f'{esc(article.get("title"))}</a>'
@@ -158,13 +221,21 @@ def render_topic(idx, topic, detail_href=None):
         for article in topic.get("articles", [])
     )
     detail = f'<a class="detail-link" href="{esc(detail_href)}">상세 조사 정리 →</a>' if detail_href else ""
+    check = render_completion_control(check_id) if check_id else ""
     return f"""<article class="topic">
 <div class="tnum">{idx:02d}</div>
+{check}
 <div class="ttitle">{esc(topic.get("topic"))}</div>
 <p class="tbasis">{esc(topic.get("basis"))}</p>
 {detail}
 <ul class="arts">{arts}</ul>
 </article>"""
+
+
+def render_completion_control(check_id):
+    return f'''<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="{esc(check_id)}">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>'''
 
 
 def render_topic_page(brief, category_key, category, topic, is_celeb=False):
@@ -211,6 +282,7 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
         f'<div class="detail-section"><h3>내부링크 아이디어</h3>{render_list(internal)}</div>'
         if internal else ""
     )
+    completion = render_completion_control(f"{date}:{page_id}")
     return f"""<!doctype html><html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="briefing-date" content="{esc(date)}">
@@ -219,7 +291,7 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
 <style>{CSS}</style></head><body><div class="wrap">
 <div class="back"><a href="../{esc(date)}.html">← {date_label(date)} 브리핑으로 돌아가기</a></div>
 <div class="hero"><div class="date">{esc(category.get("label"))} · {esc(section)}</div>
-<h2>{esc(topic.get("topic"))}</h2><p>{esc(lead)}</p>{warning}</div>
+{completion}<h2>{esc(topic.get("topic"))}</h2><p>{esc(lead)}</p>{warning}</div>
 <section class="detail-section"><h3>핵심 팩트</h3>{render_list(facts)}</section>
 <section class="detail-section"><h3>독자용 확인법·체크리스트</h3>{render_list(steps, ordered=True)}</section>
 <section class="detail-section"><h3>독자에게 실익이 있는 포인트</h3>{render_list(practical)}</section>
@@ -231,7 +303,7 @@ def render_topic_page(brief, category_key, category, topic, is_celeb=False):
 {internal_block}
 <footer>기사 원문을 확인한 뒤 미확정 정보와 수치를 보완해 발행하세요.<br>
 <a href="../tracker.html">작성 관리표 보기</a></footer>
-</div></body></html>"""
+</div>{CHECK_SCRIPT}</body></html>"""
 
 
 def render_day(brief, prev_date=None, next_date=None):
@@ -254,6 +326,7 @@ def render_day(brief, prev_date=None, next_date=None):
                     i + 1,
                     topic,
                     f'topics/{topic_page_id(brief["date"], key, topic)}.html',
+                    f'{brief["date"]}:{topic_page_id(brief["date"], key, topic)}',
                 )
                 for i, topic in enumerate(category["topics"])
             ]
@@ -267,6 +340,7 @@ def render_day(brief, prev_date=None, next_date=None):
                     i + 1,
                     topic,
                     f'topics/{topic_page_id(brief["date"], key, topic)}.html',
+                    f'{brief["date"]}:{topic_page_id(brief["date"], key, topic)}',
                 ).replace('class="topic"', 'class="topic celeb"')
                 for i, topic in enumerate(category["celeb_topics"])
             ]
@@ -283,6 +357,7 @@ def render_day(brief, prev_date=None, next_date=None):
     if next_date:
         nav.append(f'<a href="{next_date}.html">{next_date[5:]} →</a>')
 
+    checkbar = '<div class="checkbar"><strong data-check-summary>완료 0 / 전체 0</strong><span>주제 카드의 완료 표시는 이 브라우저에 저장됩니다.</span><button type="button" data-reset-checks>이 페이지 체크 지우기</button></div>'
     return f"""<!doctype html><html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="briefing-date" content="{esc(brief["date"])}">
@@ -291,10 +366,11 @@ def render_day(brief, prev_date=None, next_date=None):
 <header class="top"><h1>오늘의 블로그 브리핑</h1>
 <div class="date">{date_label(brief["date"])} · {generated} 생성</div>
 <nav class="nav">{"".join(nav)}</nav></header>
+{checkbar}
 {"".join(body)}
 <footer>기사 원문 링크는 새 탭에서 열립니다. 발행 시각은 한국 시간 기준.<br>
 기사 1개당 서로 다른 관련 기사 3개를 우선 연결합니다.</footer>
-</div></body></html>"""
+</div>{CHECK_SCRIPT}</body></html>"""
 
 
 def render_archive(dates):
