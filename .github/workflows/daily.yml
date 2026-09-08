@@ -46,10 +46,17 @@ jobs:
       - name: 3. 작성 관리표 생성
         run: python scripts/build_tracker.py
 
-      - name: 4. 사이트 생성
+      - name: 4. 키워드 연구 보고서 생성
+        env:
+          NAVER_SEARCHAD_ACCESS_LICENSE: ${{ secrets.NAVER_SEARCHAD_ACCESS_LICENSE }}
+          NAVER_SEARCHAD_SECRET_KEY: ${{ secrets.NAVER_SEARCHAD_SECRET_KEY }}
+          NAVER_SEARCHAD_CUSTOMER_ID: ${{ secrets.NAVER_SEARCHAD_CUSTOMER_ID }}
+        run: python scripts/build_keyword_report.py
+
+      - name: 5. 사이트 생성
         run: python scripts/build_site.py
 
-      - name: 5. 커밋 (브리핑·작성 관리표 보존)
+      - name: 6. 커밋 (브리핑·키워드 보고서·작성 관리표 보존)
         run: |
           git config user.name  "briefing-bot"
           git config user.email "briefing-bot@users.noreply.github.com"
@@ -57,12 +64,12 @@ jobs:
           git diff --staged --quiet || git commit -m "브리핑 $(TZ=Asia/Seoul date +%Y-%m-%d)"
           git push
 
-      - name: 6. Pages 반영 확인
+      - name: 7. Pages 반영 확인
         env:
           SITE_URL: ${{ secrets.SITE_URL }}
         run: python scripts/wait_for_site.py
 
-      - name: 7. 카카오톡 알림
+      - name: 8. 카카오톡 알림 (뉴스 + 키워드 연구)
         env:
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
