@@ -683,6 +683,7 @@ def render_day(brief, prev_date=None, next_date=None):
 
     nav = [
         '<a href="./">최신</a>',
+        '<a href="keywords/">키워드 연구</a>',
         '<a href="archive.html">지난 브리핑</a>',
         '<a href="category.html">카테고리별</a>',
         '<a href="celebrity.html">연예인 정보</a>',
@@ -753,7 +754,7 @@ def render_run_page(brief, run_id):
 <title>{date_label(brief["date"])} {generated} 실행 기록</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>브리핑 실행 기록</h1>
 <div class="date">{date_label(brief["date"])} · {generated} 실행</div>
-<nav class="nav"><a href="../">최신 브리핑</a><a href="../archive.html">날짜별 보관</a><a href="../category.html">카테고리별</a><a href="../celebrity.html">연예인 정보</a><a href="../stats.html">통계</a><a href="../tracker.html">작성 관리</a></nav></header>
+<nav class="nav"><a href="../">최신 브리핑</a><a href="../keywords/">키워드 연구</a><a href="../archive.html">날짜별 보관</a><a href="../category.html">카테고리별</a><a href="../celebrity.html">연예인 정보</a><a href="../stats.html">통계</a><a href="../tracker.html">작성 관리</a></nav></header>
 {checkbar}
 {"".join(body)}
 <footer>같은 날짜에 다시 실행된 브리핑도 이 페이지에서 확인할 수 있습니다.</footer>
@@ -783,7 +784,7 @@ def render_archive(dates, runs=None):
 <title>지난 브리핑</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>지난 브리핑</h1>
 <div class="date">{len(dates)}일치</div>
-<nav class="nav"><a href="./">최신으로</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
+<nav class="nav"><a href="./">최신으로</a><a href="keywords/">키워드 연구</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
 <h2>날짜별 브리핑</h2><ul class="arch">{"".join(items) or "<li>아직 날짜별 브리핑이 없습니다.</li>"}</ul>
 {run_section}</div></body></html>"""
 
@@ -845,7 +846,7 @@ def render_category_dashboard(brief, tracker_rows=None):
 <title>카테고리별 블로그 브리핑</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>카테고리별 블로그 브리핑</h1>
 <div class="date">{date_label(brief["date"])} · 오늘 주제 {total}개 · 작성 완료 {written_count}개 · 발행 완료 {published_count}개</div>
-<nav class="nav"><a href="./">오늘의 브리핑</a><a href="archive.html">날짜별 보관</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
+<nav class="nav"><a href="./">오늘의 브리핑</a><a href="keywords/">키워드 연구</a><a href="archive.html">날짜별 보관</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
 <div class="dashboard-tools"><select id="parent-filter"><option value="">전체 대분류</option>{options}</select>
 <input id="topic-search" type="search" placeholder="주제·세부 카테고리 검색"></div>
 <p class="date">세부 카테고리와 콘텐츠 유형을 확인하고, 상세 조사·작성 상태를 한눈에 관리할 수 있습니다.</p>
@@ -896,7 +897,7 @@ def render_celebrity_dashboard(brief):
 <title>연예인 정보 브리핑</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>연예인 정보</h1>
 <div class="date">{date_label(brief["date"])} · 현재 이슈 {total}개</div>
-<nav class="nav"><a href="./">오늘의 브리핑</a><a href="archive.html">날짜별 보관</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
+<nav class="nav"><a href="./">오늘의 브리핑</a><a href="keywords/">키워드 연구</a><a href="archive.html">날짜별 보관</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
 <div class="checkbar"><strong data-check-summary>완료 0 / 전체 0</strong><span>프로필 확인과 블로그 참고글 조사가 끝난 주제를 체크하세요.</span><button type="button" data-reset-checks>이 페이지 체크 지우기</button></div>
 <p class="method-note">프로필은 기사·공식 자료에 근거한 내용만 표시합니다. 네이버 블로그 참고글은 조회수 순위가 아니라 검색 정확도와 요약문 키워드 포함도 기준입니다.</p>
 {"".join(cards) or '<p class="empty">현재 연예인 정보 주제가 없습니다.</p>'}
@@ -953,7 +954,7 @@ def render_stats_page(briefs, tracker_rows=None):
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>브리핑 통계</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>브리핑 통계</h1><div class="date">최근 7일 · {esc(period)}</div>
-<nav class="nav"><a href="./">오늘의 브리핑</a><a href="archive.html">날짜별 보관</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
+<nav class="nav"><a href="./">오늘의 브리핑</a><a href="keywords/">키워드 연구</a><a href="archive.html">날짜별 보관</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a><a href="tracker.html">작성 관리</a></nav></header>
 <div class="stats-grid"><div class="stat-card"><strong>{total}</strong><span>최근 7일 주제</span></div>
 <div class="stat-card"><strong>{written}</strong><span>작성 완료</span></div>
 <div class="stat-card"><strong>{published}</strong><span>발행 완료</span></div>
@@ -990,7 +991,7 @@ def render_tracker(rows):
 <title>블로그 작성 관리</title><style>{CSS}</style></head><body><div class="wrap">
 <header class="top"><h1>블로그 작성 관리</h1>
 <div class="date">Excel 또는 Google Sheets에서 editorial_tracker.csv를 수정하세요.</div>
-<nav class="nav"><a href="./">최신 브리핑</a><a href="archive.html">지난 브리핑</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a>
+<nav class="nav"><a href="./">최신 브리핑</a><a href="keywords/">키워드 연구</a><a href="archive.html">지난 브리핑</a><a href="category.html">카테고리별</a><a href="celebrity.html">연예인 정보</a><a href="stats.html">통계</a>
 <a href="editorial_tracker.csv">CSV 내려받기</a></nav></header>
 <table class="tracker"><thead><tr><th>날짜</th><th>카테고리</th><th>주제</th>
 <th>작성 여부</th><th>발행 여부</th><th>발행 URL</th></tr></thead>

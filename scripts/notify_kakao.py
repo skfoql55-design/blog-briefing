@@ -45,7 +45,7 @@ def refresh_access_token():
     return body["access_token"]
 
 
-def send_text(access_token, text, link_url):
+def send_text(access_token, text, link_url, button_title="브리핑 열기"):
     if len(text) > LIMIT:
         suffix = f"\n{link_url}"
         available = max(20, LIMIT - len(suffix) - 2)
@@ -54,7 +54,7 @@ def send_text(access_token, text, link_url):
         "object_type": "text",
         "text": text,
         "link": {"web_url": link_url, "mobile_web_url": link_url},
-        "button_title": "브리핑 열기",
+        "button_title": button_title,
     }
     for attempt in range(3):
         try:
@@ -119,10 +119,18 @@ def main():
             "아래 링크에서 확인해주세요.\n"
             f"{day_url}"
         )
-    all_ok = send_text(token, message, day_url)
+    news_ok = send_text(token, message, day_url, "뉴스 브리핑 열기")
 
-    if not all_ok:
-        print("카카오톡 메시지 중 하나 이상 전송되지 않았습니다.")
+    keyword_url = f"{site}/keywords/"
+    keyword_message = (
+        "오늘의 키워드 연구 보고서입니다.\n\n"
+        "검색량·검색 추이·경쟁도·추천 글감을 확인하세요.\n"
+        f"{keyword_url}"
+    )
+    keyword_ok = send_text(token, keyword_message, keyword_url, "키워드 보고서 열기")
+
+    if not (news_ok and keyword_ok):
+        print("카카오톡 뉴스 브리핑 또는 키워드 연구 보고서 중 하나 이상 전송되지 않았습니다.")
         sys.exit(1)
 
 
