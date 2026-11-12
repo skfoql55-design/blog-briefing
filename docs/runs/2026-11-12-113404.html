@@ -1,0 +1,761 @@
+<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2026년 11월 12일 (목) 11:31:57 실행 기록</title><style>
+*{box-sizing:border-box}
+:root{
+  --bg:#f7f6f3; --card:#fff; --ink:#1a1a1a; --muted:#6b6b6b;
+  --line:#e3e0da; --chip:#efece6;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16171a; --card:#1e2024; --ink:#eceae6; --muted:#9a9a9a;
+    --line:#2e3238; --chip:#282b30;
+  }
+}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",
+  "Noto Sans KR",sans-serif;line-height:1.6;-webkit-text-size-adjust:100%}
+.wrap{max-width:900px;margin:0 auto;padding:24px 18px 64px}
+header.top{padding:14px 0 22px;border-bottom:1px solid var(--line);margin-bottom:26px}
+h1{font-size:1.45rem;margin:0 0 4px;letter-spacing:-.02em}
+.date{color:var(--muted);font-size:.88rem}
+.nav{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+.nav a{font-size:.8rem;text-decoration:none;color:var(--muted);
+  background:var(--chip);padding:5px 11px;border-radius:99px}
+.nav a:hover{color:var(--ink)}
+section.cat{margin-bottom:38px}
+.cathead{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.cathead h2{font-size:1.12rem;margin:0;letter-spacing:-.01em}
+.dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.catmeta{color:var(--muted);font-size:.78rem;margin:0 0 16px 19px}
+.topic{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:15px 17px;margin-bottom:11px}
+.topic.completed{border-color:#76a987;background:linear-gradient(90deg,var(--card),rgba(118,169,135,.08))}
+.topic.completed .ttitle{color:var(--muted)}
+.tnum{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.interest-badge{display:inline-block;margin-left:7px;background:var(--chip);border-radius:99px;padding:2px 7px;color:var(--muted);font-size:.68rem;font-weight:500;vertical-align:1px}
+.ttitle{font-size:1rem;font-weight:600;margin:3px 0 6px;letter-spacing:-.01em}
+.tbasis{font-size:.87rem;color:var(--muted);margin:0 0 11px}
+.topic-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 7px}
+.complete-toggle{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:.78rem;cursor:pointer;user-select:none}
+.complete-toggle input{width:16px;height:16px;accent-color:#3b8f5b;cursor:pointer}
+.complete-note{color:var(--muted);font-size:.72rem}
+.trend-summary{color:var(--muted);font-size:.75rem;margin:4px 0 0 19px}
+.checkbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin:0 0 18px;font-size:.8rem;color:var(--muted)}
+.checkbar strong{color:var(--ink)}
+.checkbar button{border:1px solid var(--line);background:var(--chip);color:var(--muted);border-radius:7px;padding:5px 9px;cursor:pointer}
+.checkbar button:hover{color:var(--ink)}
+.arts{list-style:none;margin:0;padding:11px 0 0;border-top:1px dashed var(--line)}
+.arts li{margin-bottom:7px;font-size:.83rem;line-height:1.5}
+.arts li:last-child{margin-bottom:0}
+.arts a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.arts a:hover{border-color:var(--muted)}
+.amet{color:var(--muted);font-size:.76rem;white-space:nowrap}
+.celeb{border-style:dashed}
+.celebhead{font-size:.83rem;color:var(--muted);margin:22px 0 10px;
+  padding-top:16px;border-top:1px solid var(--line)}
+.empty{color:var(--muted);font-size:.88rem;background:var(--card);
+  border:1px dashed var(--line);border-radius:12px;padding:16px}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:.78rem}
+footer a{color:var(--muted)}
+.arch{list-style:none;padding:0;margin:0}
+.arch li{padding:11px 0;border-bottom:1px solid var(--line)}
+.arch a{color:var(--ink);text-decoration:none;font-size:.95rem}
+.tracker{width:100%;border-collapse:collapse;font-size:.78rem;background:var(--card)}
+.tracker th,.tracker td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tracker th{color:var(--muted);font-weight:600;white-space:nowrap}
+.tracker a{color:var(--ink)}
+.dashboard-tools{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.dashboard-tools input,.dashboard-tools select{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit;font-size:.82rem}
+.category-table{width:100%;border-collapse:collapse;font-size:.78rem;background:var(--card);border:1px solid var(--line)}
+.category-table th,.category-table td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.category-table th{color:var(--muted);font-weight:600;white-space:nowrap}
+.category-table a{color:var(--ink);font-weight:600;text-decoration:none}
+.category-table a:hover{text-decoration:underline}
+.tag{display:inline-block;background:var(--chip);border-radius:99px;padding:2px 7px;color:var(--muted);font-size:.7rem;white-space:nowrap}
+.dashboard-check{white-space:nowrap;color:var(--muted);font-size:.75rem}
+.dashboard-check input{accent-color:#3b8f5b}
+@media (max-width:700px){.category-table{display:block;overflow-x:auto;white-space:nowrap}.category-table td.topic-cell{white-space:normal;min-width:230px}}
+.status{white-space:nowrap;font-weight:600}
+.detail-link{display:inline-block;margin:2px 0 10px;color:var(--muted);font-size:.78rem;text-decoration:none}
+.detail-link:hover{color:var(--ink)}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:18px}
+.hero h2{margin:0 0 8px;font-size:1.35rem;letter-spacing:-.02em}
+.hero p{margin:0;color:var(--muted)}
+.warning{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:13px 15px;margin:16px 0}
+@media (prefers-color-scheme:dark){.warning{background:#2c2117;border-color:#7c4a20;color:#fdba74}}
+.detail-section{margin:24px 0}
+.detail-section h3{font-size:1rem;margin:0 0 9px}
+.detail-section ul,.detail-section ol{margin:0;padding-left:22px}
+.detail-section li{margin:6px 0}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{display:inline-block;background:var(--chip);border-radius:99px;padding:4px 10px;color:var(--muted);font-size:.78rem}
+.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.source-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.source-card a{color:var(--ink);font-weight:600;text-decoration:none}
+.source-card p{font-size:.82rem;color:var(--muted);margin:6px 0 0}
+.table-scroll{overflow-x:auto}
+.comparison{width:100%;border-collapse:collapse;font-size:.78rem;background:var(--card)}
+.comparison th,.comparison td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.comparison th{color:var(--muted);font-weight:600;white-space:nowrap}
+.comparison a{color:var(--ink)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 18px}
+.stat-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px}
+.stat-card strong{display:block;font-size:1.35rem}
+.stat-card span{color:var(--muted);font-size:.76rem}
+.headline-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.headline-option{display:flex;gap:8px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;cursor:pointer}
+.headline-option:has(input:checked){border-color:#3b8f5b;box-shadow:0 0 0 1px #3b8f5b inset}
+.headline-option input{margin-top:4px;accent-color:#3b8f5b}
+.headline-option span{font-size:.83rem;line-height:1.45}
+.frame-tag{display:inline-block;margin-right:6px;color:var(--muted);font-size:.7rem;background:var(--chip);border-radius:99px;padding:1px 6px}
+.headline-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+.headline-actions button{border:1px solid var(--line);background:var(--chip);color:var(--muted);border-radius:7px;padding:6px 10px;cursor:pointer}
+.headline-actions button:hover{color:var(--ink)}
+.selected-headline{color:var(--muted);font-size:.8rem}
+.similarity-list{display:grid;gap:7px}
+.similarity-row{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+.similarity-row.high{border-color:#e09a87;background:#fff8f5}
+.similarity-row.low{border-color:#8bb99a}
+@media (prefers-color-scheme:dark){.similarity-row.high{background:#2b211d}.similarity-row.low{background:#1b2920}}
+.similarity-row summary{cursor:pointer;display:flex;justify-content:space-between;gap:10px;list-style:none;font-size:.83rem}
+.similarity-row summary::-webkit-details-marker{display:none}
+.similarity-score{white-space:nowrap;color:var(--muted);font-size:.75rem}
+.similarity-row p{font-size:.78rem;color:var(--muted);margin:8px 0 0}
+.similarity-row a{color:var(--ink)}
+.method-note{color:var(--muted);font-size:.78rem;margin:0 0 10px}
+.judgment{background:var(--chip);border-radius:9px;padding:10px 12px;font-size:.82rem;margin-bottom:10px}
+.judgment strong{margin-right:5px}
+.back{margin-bottom:16px;font-size:.82rem}
+.back a{color:var(--muted);text-decoration:none}
+</style></head><body><div class="wrap">
+<header class="top"><h1>브리핑 실행 기록</h1>
+<div class="date">2026년 11월 12일 (목) · 11:31:57 실행</div>
+<nav class="nav"><a href="../">최신 브리핑</a><a href="../keywords/">키워드 연구</a><a href="../archive.html">날짜별 보관</a><a href="../category.html">카테고리별</a><a href="../celebrity.html">연예인 정보</a><a href="../stats.html">통계</a><a href="../tracker.html">작성 관리</a></nav></header>
+<div class="checkbar"><strong data-check-summary>완료 0 / 전체 0</strong><span>이 실행 기록의 완료 표시는 이 브라우저에 저장됩니다.</span><button type="button" data-reset-checks>이 페이지 체크 지우기</button></div>
+<section class="cat"><div class="cathead"><span class="dot" style="background:#1d6f5c"></span><h2>경제 · 한국 주식</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_kr_stock:7f41a0e515ee01cc">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">9월만 법인세 36조 걷혀…나라살림 적자 1년새 70조 축소</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://biz.heraldcorp.com/article/10934952?ref=naver" target="_blank" rel="noopener">9월만 법인세 36조 걷혀…나라살림 적자 1년새 70조 축소</a> <span class="amet">· 네이버뉴스 11/12 11:25</span></li><li><a href="https://www.mediaus.co.kr/news/articleView.html?idxno=318954" target="_blank" rel="noopener">반도체 호황에 나라살림 적자 70조 축소…8년 만에 최소</a> <span class="amet">· 네이버뉴스 11/12 11:14</span></li><li><a href="https://www.etnews.com/20261112000184" target="_blank" rel="noopener">9월까지 나라살림 적자 8년 만에 '최소'…반도체 호황에 법인세 급증</a> <span class="amet">· 네이버뉴스 11/12 11:22</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_kr_stock:a9013ad128e3b0e9">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">[ 오늘 의 삼전닉스] 젠슨 황 변수와 불확실성에도 삼성전자 '외인 베팅' ...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://economist.co.kr/article/view/ecn202611120028" target="_blank" rel="noopener">[ 오늘 의 삼전닉스] 젠슨 황 변수와 불확실성에도 삼성전자 '외인 베팅' ...</a> <span class="amet">· 네이버뉴스 11/12 11:27</span></li><li><a href="https://www.hankyung.com/article/202611122331i" target="_blank" rel="noopener">젠슨 황 해임 위기에 K반도체도 긴장…삼전닉스에 악재일까</a> <span class="amet">· 한국경제 | 뉴스 | 증권 11/12 10:54</span></li><li><a href="https://www.mydaily.co.kr/page/view/2026111210292029501" target="_blank" rel="noopener">젠슨 황 이르면 오늘 해임 논의…삼성·SK하이닉스 ‘촉각’</a> <span class="amet">· 네이버뉴스 11/12 10:35</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_kr_stock:2722fd8012a9f1f8">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">[뉴스분석]불륜 의혹에 세계 경제계 촉각…젠슨 황은 누구길래</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.namdonews.com/news/articleView.html?idxno=929038" target="_blank" rel="noopener">[뉴스분석]불륜 의혹에 세계 경제계 촉각…젠슨 황은 누구길래</a> <span class="amet">· 네이버뉴스 11/12 10:58</span></li><li><a href="http://www.yonhapnewstv.co.kr/news/MYH20261112101558n3z" target="_blank" rel="noopener">[뉴스초점] 젠슨황 사내불륜 추가 의혹…&quot;이사회, 해임 준비&quot;</a> <span class="amet">· 네이버뉴스 11/12 10:17</span></li><li><a href="https://biz.chosun.com/topics/topics_social/2026/11/12/TGWJSZRGYVE4NPGPHN6WQFF5PQ/" target="_blank" rel="noopener">“진짜 ‘LOVE, LOVE, LOVE’ 였네”… 젠슨 황 또 불륜설에 ‘밈’ 폭발</a> <span class="amet">· Chosunbiz 11/12 10:21</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_kr_stock:ea09df5e488c6b3d">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">월드 뉴스 브리프 (기준일시: 2026년 11월 12일 목요일 10:00)</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://www.ifs.or.kr/bbs/board.php?bo_table=globalnewsfocus&amp;wr_id=527" target="_blank" rel="noopener">월드 뉴스 브리프 (기준일시: 2026년 11월 12일 목요일 10:00)</a> <span class="amet">· 네이버뉴스 11/12 11:00</span></li><li><a href="https://www.dailian.co.kr/news/view/1714043/?sc=Naver" target="_blank" rel="noopener">세수 호황에도 나랏빚 100조원 늘어…관리재정수지는 11조원 흑자</a> <span class="amet">· 네이버뉴스 11/12 10:31</span></li><li><a href="https://news.einfomax.co.kr/news/articleView.html?idxno=4444348" target="_blank" rel="noopener">[뉴욕 마켓 브리핑](12일)</a> <span class="amet">· 네이버뉴스 11/12 09:34</span></li></ul>
+</article><article class="topic">
+<div class="tnum">05<span class="interest-badge">관심도 86 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_kr_stock:a09188ef760faffb">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">“젠슨 황 떠나나”…엔비디아 해임설에 증시도 ‘긴장’</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.kukinews.com/article/view/kuk202611120066" target="_blank" rel="noopener">“젠슨 황 떠나나”…엔비디아 해임설에 증시도 ‘긴장’</a> <span class="amet">· 네이버뉴스 11/12 11:02</span></li><li><a href="https://www.hankyung.com/article/202611121596i" target="_blank" rel="noopener">&quot;엔비디아 이사회, 젠슨 황 해임 준비&quot;…시간외 주가 8% 급락</a> <span class="amet">· 한국경제 | 뉴스 | 증권 11/12 08:07</span></li><li><a href="https://biz.chosun.com/it-science/ict/2026/11/12/SZ66OJC42RGQVOCXF2I7BLOO4E/" target="_blank" rel="noopener">WSJ “엔비디아 이사회, 젠슨 황 해임 준비”… NYT “사내 여성 임원과도 불륜”</a> <span class="amet">· Chosunbiz 11/12 07:48</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#256d8a"></span><h2>경제 · 미국 주식</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_us_stock:cb51f260acdf80f3">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">‘TIGER美나스닥100채권혼합50’ 순자산 5000억 돌파</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://biz.heraldcorp.com/article/10934945?ref=naver" target="_blank" rel="noopener">‘TIGER美나스닥100채권혼합50’ 순자산 5000억 돌파</a> <span class="amet">· 네이버뉴스 11/12 11:24</span></li><li><a href="https://www.inthenews.co.kr/news/article.html?no=94418" target="_blank" rel="noopener">미래에셋자산운용, TIGER 미국 나스닥100채권혼합50 순자산 5000억 돌파</a> <span class="amet">· 네이버뉴스 11/12 11:18</span></li><li><a href="https://www.mk.co.kr/article/12206167" target="_blank" rel="noopener">미래에셋, TIGER 미국 나스닥100채권혼합50 ETF 순자산 5000억원 돌파</a> <span class="amet">· 네이버뉴스 11/12 10:54</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 86 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_us_stock:385d98f7b106261d">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">[ 증시 프리즘] 지수 방어 나선 개인 코스피, 코스닥 모두 순매수 행진…...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.moneystorm.kr/news/articleView.html?idxno=8356" target="_blank" rel="noopener">[ 증시 프리즘] 지수 방어 나선 개인 코스피, 코스닥 모두 순매수 행진…...</a> <span class="amet">· 네이버뉴스 11/12 11:13</span></li><li><a href="https://www.newstopkorea.com/news/articleView.html?idxno=48967" target="_blank" rel="noopener">美 증시 , 3대 지수 모두 상승…나스닥 1.60%↑</a> <span class="amet">· 네이버뉴스 11/12 07:44</span></li><li><a href="https://www.ddaily.co.kr/page/view/2026111210052875060" target="_blank" rel="noopener">“코스피 5800선에서 매수 신호?”…신영증권, 증시 공포에도 현금 보유...</a> <span class="amet">· 네이버뉴스 11/12 11:01</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 86 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_us_stock:6cada4fbc0771e38">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">코어위브 25% 폭등…AI 거품론 '일단 진화'</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.mstoday.co.kr/news/articleView.html?idxno=200459" target="_blank" rel="noopener">코어위브 25% 폭등…AI 거품론 '일단 진화'</a> <span class="amet">· 네이버뉴스 11/12 11:04</span></li><li><a href="https://www.newsquest.co.kr/news/articleView.html?idxno=304798" target="_blank" rel="noopener">[굿모닝! 글로벌 뉴욕증시] 코어위브 25% 폭등에 AI 불안 진정…반도체...</a> <span class="amet">· 네이버뉴스 11/12 08:12</span></li><li><a href="https://www.news1.kr/world/international-economy/6351184" target="_blank" rel="noopener">[뉴욕마감]AI 투자 우려 완화에 나스닥 1.6% 상승…코어위브 25% 폭등</a> <span class="amet">· 네이버뉴스 11/12 06:54</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 86 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_us_stock:574964915227380c">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">한국 투자 증권, 글로벌 리츠펀드 연말 출시…‘9.9% 분리과세’ 막차 수...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://sateconomy.co.kr/news/view/1065577387849181" target="_blank" rel="noopener">한국 투자 증권, 글로벌 리츠펀드 연말 출시…‘9.9% 분리과세’ 막차 수...</a> <span class="amet">· 네이버뉴스 11/12 11:00</span></li><li><a href="https://www.imaeil.com/page/view/2026111209380570688" target="_blank" rel="noopener">[여의도단신] NH 투자 증권·미래에셋자산운용·신한자산운용</a> <span class="amet">· 네이버뉴스 11/12 09:41</span></li><li><a href="http://www.wowtv.co.kr/NewsCenter/News/Read?articleId=A202611120010&amp;t=NN" target="_blank" rel="noopener">코어위브발 AI 투자심리 회복에 뉴욕 증시 일제히 상승-[글로벌 마감 시...</a> <span class="amet">· 네이버뉴스 11/12 07:04</span></li></ul>
+</article><article class="topic">
+<div class="tnum">05<span class="interest-badge">관심도 84 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_us_stock:d8b0ba8f9c9a922b">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">앤트로픽 IPO·코어위브 실적發 호재...반도체 두톱 ‘삼전닉스’ 수혜...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://biz.heraldcorp.com/article/10934942?ref=naver" target="_blank" rel="noopener">앤트로픽 IPO·코어위브 실적發 호재...반도체 두톱 ‘삼전닉스’ 수혜...</a> <span class="amet">· 네이버뉴스 11/12 11:23</span></li><li><a href="https://www.sedaily.com/article/20113237?ref=naver" target="_blank" rel="noopener">나스닥, 앤트로픽 호재에 1.6% ↑...반도체주 급등 [데일리국제금융]</a> <span class="amet">· 네이버뉴스 11/12 06:46</span></li><li><a href="https://www.topstarnews.net/news/articleView.html?idxno=16274278" target="_blank" rel="noopener">미국증시 장초반 나스닥 1.53% 상승…코어위브 실적에 AI·반도체주 급등...</a> <span class="amet">· 네이버뉴스 11/11 23:48</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#3f7d5a"></span><h2>경제 · 재테크</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_finance:2586ea7599c99d44">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">'박재현 중견수→문현빈 우익수' 한국, 호주전 선발 라인업 공개…김주원+김도영 테이블 세터 [오!쎈 도쿄]</div>
+<p class="tbasis">Chosunbiz 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://biz.chosun.com/sports/baseball/2026/11/12/MQZTOZRSGVTDCMLCMM3DSYLCHA/" target="_blank" rel="noopener">'박재현 중견수→문현빈 우익수' 한국, 호주전 선발 라인업 공개…김주원+김도영 테이블 세터 [오!쎈 도쿄]</a> <span class="amet">· Chosunbiz 11/12 10:41</span></li><li><a href="https://www.g-enews.com/view.php?ud=202611120933394482923c501012_1" target="_blank" rel="noopener">&quot;13월 보너스 놓칠래?&quot;…한국 투자 증권, 연말 절세 영상 두 편 공개</a> <span class="amet">· 네이버뉴스 11/12 10:10</span></li><li><a href="https://www.joongangenews.com/news/articleView.html?idxno=563263" target="_blank" rel="noopener">한국 투자 증권, 연금 저축 세액공제·배당 세금 알려주는 영상 공개</a> <span class="amet">· 네이버뉴스 11/12 10:10</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_finance:2fdb7cb92dd19e6a">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">22기 옥순, 400만원 들고 결정사 갔더니..“60대 괜찮냐고, 그냥 명품백 샀다”</div>
+<p class="tbasis">Chosunbiz 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://biz.chosun.com/entertainment/enter_general/2026/11/12/MEZGMN3GGI4TCNBZGRRDEMJWGU/" target="_blank" rel="noopener">22기 옥순, 400만원 들고 결정사 갔더니..“60대 괜찮냐고, 그냥 명품백 샀다”</a> <span class="amet">· Chosunbiz 11/12 11:24</span></li><li><a href="https://www.ddaily.co.kr/page/view/2026111209405315064" target="_blank" rel="noopener">“ 연금 저축 600만원, 얼마나 돌려받을까”…한국 투자 증권, 연말 절세 법...</a> <span class="amet">· 네이버뉴스 11/12 10:56</span></li><li><a href="https://www.hankyung.com/article/202611110799i" target="_blank" rel="noopener">4개월만에 22만원에서 8만원대로…현대백화점 반등 가능할까</a> <span class="amet">· 한국경제 | 뉴스 | 증권 11/12 10:10</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 82 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_finance:1abb4c57be494822">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">[증권 소식] 교보증권·KB증권·NH 투자 증권·카카오페이증권·유진 투자 증...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://sateconomy.co.kr/news/view/1065575679460675" target="_blank" rel="noopener">[증권 소식] 교보증권·KB증권·NH 투자 증권·카카오페이증권·유진 투자 증...</a> <span class="amet">· 네이버뉴스 11/12 10:26</span></li><li><a href="https://www.asiaa.co.kr/news/articleView.html?idxno=270609" target="_blank" rel="noopener">[A 증권가 소식] 미래에셋증권, 11월 개인 투자 용국채 청약 실시...10·20년...</a> <span class="amet">· 네이버뉴스 11/11 15:48</span></li><li><a href="https://www.imaeil.com/page/view/2026111209460682387" target="_blank" rel="noopener">[여의도단신]한국 투자 증권·KB증권·하나증권·유안타증권</a> <span class="amet">· 네이버뉴스 11/12 10:22</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 82 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_finance:96de7aba1b194a35">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">농협 회장 유권자 1104명→187만명… 선거비만 최대 190억원</div>
+<p class="tbasis">Chosunbiz 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://biz.chosun.com/stock/finance/2026/11/12/DH5O6RFRAVDZTB2BDH553FDBPU/" target="_blank" rel="noopener">농협 회장 유권자 1104명→187만명… 선거비만 최대 190억원</a> <span class="amet">· Chosunbiz 11/12 10:30</span></li><li><a href="https://www.hankyung.com/article/202611121432i" target="_blank" rel="noopener">퇴임 회장에 고문료 '28억원' 지급…은행지주 '그들만의 잔치'</a> <span class="amet">· 한국경제 | 뉴스 | 경제 11/12 08:30</span></li><li><a href="http://www.hansbiz.co.kr/news/articleView.html?idxno=882316" target="_blank" rel="noopener">미래에셋, 개인 투자 용 국채 11월 청약…총발행규모 2000억원</a> <span class="amet">· 네이버뉴스 11/11 16:08</span></li></ul>
+</article><article class="topic">
+<div class="tnum">05<span class="interest-badge">관심도 82 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_finance:4c4301b890a81d40">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">미래에셋증권, 1.4조원 자사주 소각 결정…3분기 영업손실 5023억원</div>
+<p class="tbasis">Chosunbiz 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://biz.chosun.com/stock/stock_general/2026/11/12/ZOMLNCMNFZGTHHCKBRN47XGHWQ/" target="_blank" rel="noopener">미래에셋증권, 1.4조원 자사주 소각 결정…3분기 영업손실 5023억원</a> <span class="amet">· Chosunbiz 11/12 10:31</span></li><li><a href="https://www.hankyung.com/article/2026111217846" target="_blank" rel="noopener">지니언스, 3분기 영업이익 38억원…전년 동기 대비 253%↑</a> <span class="amet">· 한국경제 | 뉴스 | 증권 11/12 08:49</span></li><li><a href="https://www.moneystorm.kr/news/articleView.html?idxno=8326" target="_blank" rel="noopener">미래에셋증권, 개인 투자 용 국채 11월 청약 실시…총 발행규모 2000억원</a> <span class="amet">· 네이버뉴스 11/11 16:20</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#7a5b2b"></span><h2>경제 · 한국 정책 이슈</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_policy:79a49192b54811df">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">금융지주 사외이사 주주가 추천…회장 3연임땐 주총 75% 찬성 얻어야</div>
+<p class="tbasis">매일경제 : 경제 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.mk.co.kr/news/economy/12205964" target="_blank" rel="noopener">금융지주 사외이사 주주가 추천…회장 3연임땐 주총 75% 찬성 얻어야</a> <span class="amet">· 매일경제 : 경제 11/12 17:41</span></li><li><a href="https://www.widedaily.com/news/articleView.html?idxno=303485" target="_blank" rel="noopener">금융 지주 회장 두 번째 연임 주총 찬성률 '75%' 못 넘으면 탈락…당국, ...</a> <span class="amet">· 네이버뉴스 11/12 10:54</span></li><li><a href="https://www.ilovepc.co.kr/news/articleView.html?idxno=61311" target="_blank" rel="noopener">금융 지주 회장 '2연임' 옛 일 된다 … &quot;주총서 3/4 찬성 얻어야&quot;</a> <span class="amet">· 네이버뉴스 11/12 10:24</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_policy:5c1e8421a059b117">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">김민석 &quot;부동산 정책 기본은 일관되게&quot;… 종부세 개편, '정부안 유지' 무...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.hankookilbo.com/news/article/A2026111209160005109?did=NA" target="_blank" rel="noopener">김민석 &quot;부동산 정책 기본은 일관되게&quot;… 종부세 개편, '정부안 유지' 무...</a> <span class="amet">· 네이버뉴스 11/12 11:31</span></li><li><a href="http://www.queen.co.kr/news/articleView.html?idxno=466204" target="_blank" rel="noopener">김민석 &quot;종부세 기본공제 대통령 만찬서 논의 안 해 …부동산 정책 일관...</a> <span class="amet">· 네이버뉴스 11/12 11:26</span></li><li><a href="https://news.kbs.co.kr/news/pc/view/view.do?ncd=8710794&amp;ref=A" target="_blank" rel="noopener">김민석, 당내 종부세 이견에 “부동산 정책 기본은 일관되게 지켜야”</a> <span class="amet">· 네이버뉴스 11/12 09:54</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_policy:32f0d456faf221fa">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">장동혁 &quot;李, 자기 손으로 공소장 찢기 전 재판 재개해야&quot;</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.newscj.com/news/articleView.html?idxno=3448093" target="_blank" rel="noopener">장동혁 &quot;李, 자기 손으로 공소장 찢기 전 재판 재개해야&quot;</a> <span class="amet">· 네이버뉴스 11/12 11:18</span></li><li><a href="https://www.mediapen.com/news/view/1136926" target="_blank" rel="noopener">장동혁 &quot;피고인 이재명, 자기 손으로 공소장 찢기 전 재판 재개해야&quot;</a> <span class="amet">· 네이버뉴스 11/12 10:32</span></li><li><a href="https://www.shinailbo.co.kr/news/articleView.html?idxno=5082601" target="_blank" rel="noopener">장동혁 &quot;李, 공소장 찢기 전에 법원 재판 재개해야&quot;</a> <span class="amet">· 네이버뉴스 11/12 11:18</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 82 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_policy:5eca52cdc55195ad">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">李 “메가프로젝트, 중소·협력업체 기술 투자에 ‘불씨’... 매우 긍정적 신호&quot;</div>
+<p class="tbasis">Chosunbiz 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://biz.chosun.com/policy/politics/president_office/2026/11/12/7ZGLIDHO4NBMTCIHZJA5JLZME4/" target="_blank" rel="noopener">李 “메가프로젝트, 중소·협력업체 기술 투자에 ‘불씨’... 매우 긍정적 신호&quot;</a> <span class="amet">· Chosunbiz 11/12 11:26</span></li><li><a href="https://www.newspim.com/news/view/20261112000192" target="_blank" rel="noopener">[AI MY 뉴스] 12일 중국증시 'AI 투자 회의론 잠재운 실적…기술주 선별...</a> <span class="amet">· 네이버뉴스 11/12 09:24</span></li><li><a href="http://www.hansbiz.co.kr/news/articleView.html?idxno=882221" target="_blank" rel="noopener">[마켓H] AI 기술주 쏠림 부담에 배당 ETF로…월 현금흐름 투자 확산</a> <span class="amet">· 네이버뉴스 11/11 14:50</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#8a5a44"></span><h2>경제 · 부동산</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_property:6cf284873e97eead">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">[단독]서울 집값 잡겠다더니…주택공급 지원은 경기·빌라로</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.fnnews.com/news/202611121108427507" target="_blank" rel="noopener">[단독]서울 집값 잡겠다더니…주택공급 지원은 경기·빌라로</a> <span class="amet">· 네이버뉴스 11/12 11:19</span></li><li><a href="https://news-s.kr/view.html?id=L2611121054087390" target="_blank" rel="noopener">경기 비규제 12곳 집값 ‘풍선효과’ 과열… 동탄·기흥 묶자 병점·군포...</a> <span class="amet">· 네이버뉴스 11/12 11:10</span></li><li><a href="https://www.businessplus.kr/news/articleView.html?idxno=119730" target="_blank" rel="noopener">강남권 주춤하고 강북·경기권 상승…수도권 주택시장 '가격 평탄화' 확...</a> <span class="amet">· 네이버뉴스 11/12 10:36</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 85 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_property:12929fa5aa9d105e">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">&quot;강남 내리고 외곽 오른다&quot; 현실화된 집값 평탄화… 경기 북부로 온기 ...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.rcast.co.kr/news/articleView.html?idxno=32046" target="_blank" rel="noopener">&quot;강남 내리고 외곽 오른다&quot; 현실화된 집값 평탄화… 경기 북부로 온기 ...</a> <span class="amet">· 네이버뉴스 11/12 10:18</span></li><li><a href="https://www.newsis.com/view/NISX20261111_0003863450" target="_blank" rel="noopener">&quot;강남은 빠지고 성북은 뛰고&quot;…15억 이하로 번진 서울 집값 온기</a> <span class="amet">· 네이버뉴스 11/12 06:00</span></li><li><a href="https://daily.hankooki.com/news/articleView.html?idxno=1424033" target="_blank" rel="noopener">[집중분석] 집값 안정 기준은 어디에…강남뿐 아니라 '서민 주거비'도 ...</a> <span class="amet">· 네이버뉴스 11/12 08:04</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 82 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_property:3e34d2417d9e4985">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">대규모 기업 투자에 지방 부동산 시장 '온기' … 익산·구미·부산 신규 ...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://www.worktoday.co.kr/news/articleView.html?idxno=91893" target="_blank" rel="noopener">대규모 기업 투자에 지방 부동산 시장 '온기' … 익산·구미·부산 신규 ...</a> <span class="amet">· 네이버뉴스 11/12 11:08</span></li><li><a href="https://www.imaeil.com/page/view/2026111117245597627" target="_blank" rel="noopener">[사설] 서울 표심에 흔들리는 부동산 세제, 지방은 안중에도 없나</a> <span class="amet">· 네이버뉴스 11/12 05:00</span></li><li><a href="https://www.newsis.com/view/NISX20261111_0003864259" target="_blank" rel="noopener">구미 첨단산업 투자 유치, 주택시장 활기…아파트 거래량↑</a> <span class="amet">· 네이버뉴스 11/11 16:57</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 74 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_property:99bb38c01563d4e3">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">[전격시사] 이준석 개혁신당 의원 - “李 부동산 정책으로 모두가 고통...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://news.kbs.co.kr/news/pc/view/view.do?ncd=8710781&amp;ref=A" target="_blank" rel="noopener">[전격시사] 이준석 개혁신당 의원 - “李 부동산 정책으로 모두가 고통...</a> <span class="amet">· 네이버뉴스 11/12 09:41</span></li><li><a href="https://realty.chosun.com/site/data/html_dir/2026/11/11/2026111102649.html" target="_blank" rel="noopener">'총선 전멸 위기감' 민주당 수도권 의원들, 세금 폭탄 부동산 정책에 반...</a> <span class="amet">· 네이버뉴스 11/11 17:04</span></li><li><a href="https://www.cjb.co.kr/home/sub.php?menukey=61&amp;mod=view&amp;P_NO=261110510&amp;PRO_CODE=99" target="_blank" rel="noopener">국힘 &quot; 부동산 정책, 與 안에서부터 흔들려...국민에 대한 무책임&quot;</a> <span class="amet">· 네이버뉴스 11/10 20:13</span></li></ul>
+</article><article class="topic">
+<div class="tnum">05<span class="interest-badge">관심도 67 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:economy_property:2e9a5327654c321e">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">&quot;공원 품은 아파트 는 다르다&quot;... '경산 상방공원 호반써밋' 눈길</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.getnews.co.kr/news/articleView.html?idxno=886887" target="_blank" rel="noopener">&quot;공원 품은 아파트 는 다르다&quot;... '경산 상방공원 호반써밋' 눈길</a> <span class="amet">· 네이버뉴스 11/12 10:50</span></li><li><a href="https://www.dt.co.kr/article/12094188?ref=naver" target="_blank" rel="noopener">“공원 품은 아파트 는 다르다”… 시세 강세에 ‘경산 상방공원 호반써...</a> <span class="amet">· 네이버뉴스 11/10 10:39</span></li><li><a href="https://www.ksmnews.co.kr/news/view.php?idx=629253" target="_blank" rel="noopener">경산지역 아파트 과잉공급, 선제적 대책 마련해야</a> <span class="amet">· 네이버뉴스 11/10 19:38</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#a33a5b"></span><h2>건강 · 최신 이슈</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 81 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_current:51181651813a6b9f">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">'스시자로' 반입 허용…국내 비만약값 흔드나</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.mstoday.co.kr/news/articleView.html?idxno=200460" target="_blank" rel="noopener">'스시자로' 반입 허용…국내 비만약값 흔드나</a> <span class="amet">· 네이버뉴스 11/12 11:24</span></li><li><a href="https://www.medipana.com/news/articleView.html?idxno=421586" target="_blank" rel="noopener">오늘부터 해외 藥 휴대 반입 허용…제약계·약사사회 '당혹'</a> <span class="amet">· 네이버뉴스 11/12 06:06</span></li><li><a href="http://www.inews24.com/view/2025225" target="_blank" rel="noopener">&quot;'스시자로' 사오면 일본 비행기값 뽑겠네요&quot;…비만인들 '환영'</a> <span class="amet">· 네이버뉴스 11/11 18:59</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 79 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_current:e74d6223657f17d5">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">성인 3명 중 1명 비만…30~40대 남성은 절반 이상</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.sisajournal.com/news/articleView.html?idxno=393700" target="_blank" rel="noopener">성인 3명 중 1명 비만…30~40대 남성은 절반 이상</a> <span class="amet">· 네이버뉴스 11/12 10:15</span></li><li><a href="https://www.wikitree.co.kr/articles/1173711" target="_blank" rel="noopener">한국 성인 건강 심상찮다… 3040 남성 2명 중 1명이 해당하는 '이것'</a> <span class="amet">· 네이버뉴스 11/11 14:52</span></li><li><a href="http://www.fsnews.co.kr/news/articleView.html?idxno=62616" target="_blank" rel="noopener">성인 비만 증가, 급식도 맞춤 관리 필요</a> <span class="amet">· 네이버뉴스 11/11 20:16</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 77 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_current:812ad49211951ebb">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">GLP-1 끊으면 사망 위험 커진다?…&quot;약 중단 선택한 '숨은 요인' 봐야&quot;</div>
+<p class="tbasis">청년의사 - 전체기사 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://www.docdocdoc.co.kr/news/articleView.html?idxno=3044474" target="_blank" rel="noopener">GLP-1 끊으면 사망 위험 커진다?…&quot;약 중단 선택한 '숨은 요인' 봐야&quot;</a> <span class="amet">· 청년의사 - 전체기사 11/12 15:36</span></li><li><a href="https://www.lcnews.co.kr/news/articleView.html?idxno=211195" target="_blank" rel="noopener">[ 건강 리포트] 대사적으로 건강 한 비만도 '숨은 동맥경화' 위험…강북삼...</a> <span class="amet">· 네이버뉴스 11/11 15:30</span></li><li><a href="https://www.sisajournal.com/news/articleView.html?idxno=393558" target="_blank" rel="noopener">만성콩팥병 환자, 단백질 너무 적게 먹으면 사망 위험 117% 높아</a> <span class="amet">· 네이버뉴스 11/11 12:00</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 75 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_current:b67b35e652918f7f">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">“약물 임신중지, 의료기관 통제보다 접근권 보장 우선돼야”</div>
+<p class="tbasis">청년의사 - 전체기사 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://www.docdocdoc.co.kr/news/articleView.html?idxno=3044480" target="_blank" rel="noopener">“약물 임신중지, 의료기관 통제보다 접근권 보장 우선돼야”</a> <span class="amet">· 청년의사 - 전체기사 11/12 01:33</span></li><li><a href="https://new.dailypharm.com/user/news/344448?REFERER=NP" target="_blank" rel="noopener">보건의료단체 &quot;안전한 약물 임신중지, 접근권 보장돼야&quot;</a> <span class="amet">· 네이버뉴스 11/11 15:16</span></li><li><a href="https://www.kpanews.co.kr/news/articleView.html?idxno=548660" target="_blank" rel="noopener">&quot;안전관리&quot; 앞세운 약물 임신중지 표준안…국제기준 동떨어진 통제 논란</a> <span class="amet">· 네이버뉴스 11/11 13:10</span></li></ul>
+</article><article class="topic">
+<div class="tnum">05<span class="interest-badge">관심도 75 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_current:c074d77862c543e2">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">만성질환 진료비 90조…고혈압·당뇨 등록관리는 전국 8% 지역뿐</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://medicalworldnews.co.kr/news/view.php?idx=1510978397" target="_blank" rel="noopener">만성질환 진료비 90조…고혈압·당뇨 등록관리는 전국 8% 지역뿐</a> <span class="amet">· 네이버뉴스 11/11 23:10</span></li><li><a href="https://www.newsis.com/view/NISX20261111_0003863287" target="_blank" rel="noopener">만성질환 진료비 전체 85%…&quot;지역사회 예방관리 강화&quot;</a> <span class="amet">· 네이버뉴스 11/11 10:57</span></li><li><a href="https://news.bbsi.co.kr/news/articleView.html?idxno=4118080" target="_blank" rel="noopener">질병관리청 , 만성질환 예방관리 유공자 58점 포상…지역사회 성과 공유</a> <span class="amet">· 네이버뉴스 11/11 17:06</span></li></ul>
+</article><p class="celebhead">연예인 건강 이슈</p><article class="topic celeb">
+<div class="tnum">01<span class="interest-badge">관심도 86 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_current:celeb:c81a6a48e89cc52a">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">이루, 독감 판정 후 심경 고백→치매 투병 중인 母 언급…&quot;몸이 아프니...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.topstarnews.net/news/articleView.html?idxno=16274642" target="_blank" rel="noopener">이루, 독감 판정 후 심경 고백→치매 투병 중인 母 언급…&quot;몸이 아프니...</a> <span class="amet">· 네이버뉴스 11/12 11:28</span></li><li><a href="http://www.celuvmedia.com/article.php?aid=1794441553530750005" target="_blank" rel="noopener">이루, 독감 격리 중 '치매 母' 옥경이 걱정 &quot;몸도 정신도 아파&quot;[셀럽톡]</a> <span class="amet">· 네이버뉴스 11/12 09:28</span></li><li><a href="https://www.mt.co.kr/entertainment/2026/11/12/2026111208111987334" target="_blank" rel="noopener">'태진아 아들' 이루, 독감 격리 중에도 치매 '옥경이' 모친 간호</a> <span class="amet">· 네이버뉴스 11/12 08:43</span></li></ul>
+</article><article class="topic celeb">
+<div class="tnum">02<span class="interest-badge">관심도 83 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_current:celeb:55f42db74c13ee17">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">김종국, 극심한 어지럼증에 운전·운동까지 중단...일상 무너뜨린 '전정...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.ppss.kr/news/articleView.html?idxno=320537" target="_blank" rel="noopener">김종국, 극심한 어지럼증에 운전·운동까지 중단...일상 무너뜨린 '전정...</a> <span class="amet">· 네이버뉴스 11/12 10:52</span></li><li><a href="https://www.tenasia.co.kr/article/2026111199244" target="_blank" rel="noopener">50세 김종국, 운전도 운동도 중단…걷기조차 힘들게 만드는 '전정신경염...</a> <span class="amet">· 네이버뉴스 11/11 22:43</span></li><li><a href="https://www.mediafine.co.kr/news/articleView.html?idxno=95029" target="_blank" rel="noopener">50세 김종국, 운전-복싱 멈춰-전정신경염 정체는?</a> <span class="amet">· 네이버뉴스 11/12 06:40</span></li></ul>
+</article><article class="topic celeb">
+<div class="tnum">03<span class="interest-badge">관심도 79 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_current:celeb:8bb6e68146ba7281">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">[뮤즈★]‘연애박사’ 김민석, 故안판석 추모 “사진 찍어두길 다행..방...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.heraldmuse.com/article/10934782?ref=naver" target="_blank" rel="noopener">[뮤즈★]‘연애박사’ 김민석, 故안판석 추모 “사진 찍어두길 다행..방...</a> <span class="amet">· 네이버뉴스 11/12 10:18</span></li><li><a href="https://www.mydaily.co.kr/page/view/2026111116384169356" target="_blank" rel="noopener">김민석, 故 안판석 곁에 기댄 사진 '먹먹'…&quot;찍어두길 잘했다&quot;</a> <span class="amet">· 네이버뉴스 11/11 16:56</span></li><li><a href="https://www.spotvnews.co.kr/news/articleView.html?idxno=1019273" target="_blank" rel="noopener">다시 볼 수 없는 미소…김민석, 故안판석 감독과 투샷에 '먹먹' &quot;다행이...</a> <span class="amet">· 네이버뉴스 11/11 17:01</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#c06a3a"></span><h2>건강 · 생활 건강 정보</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_info:0e28e279922b7711">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">수능 D-7, 잠 줄이면 오히려 손해…수험생 건강 관리 핵심은</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.jnilbo.com/news/articleView.html?idxno=90000082044" target="_blank" rel="noopener">수능 D-7, 잠 줄이면 오히려 손해…수험생 건강 관리 핵심은</a> <span class="amet">· 네이버뉴스 11/12 10:52</span></li><li><a href="https://www.medipana.com/news/articleView.html?idxno=421625" target="_blank" rel="noopener">수능 앞두고 잠 줄이는 수험생…'생체리듬' 관리가 우선</a> <span class="amet">· 네이버뉴스 11/12 10:00</span></li><li><a href="https://www.edaily.co.kr/News/Read?newsId=02561686645645064&amp;mediaCodeNo=257&amp;utm_source=naver&amp;utm_medium=referral&amp;utm_campaign=news_syndication&amp;utm_content=original_article" target="_blank" rel="noopener">수능 일주일 전, 잠 줄이고 에너지음료 찾는 수험생 주의</a> <span class="amet">· 네이버뉴스 11/12 09:45</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 80 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_info:918a90c249b2ec42">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">‘위고비 실패’ 신동, 마운자로로 25kg 뺐다⋯무슨 차이길래?</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://kormedi.com/?p=2903053" target="_blank" rel="noopener">‘위고비 실패’ 신동, 마운자로로 25kg 뺐다⋯무슨 차이길래?</a> <span class="amet">· 네이버뉴스 11/12 09:44</span></li><li><a href="http://www.docdocdoc.co.kr/news/articleView.html?idxno=3044470" target="_blank" rel="noopener">위고비·마운자로 시신경병증 위험…식약처, 허가사항 변경 검토</a> <span class="amet">· 청년의사 - 전체기사 11/11 20:26</span></li><li><a href="https://news.hidoc.co.kr/news/articleView.html?idxno=69920" target="_blank" rel="noopener">&quot;위고비·마운자로, 부작용 걱정된다면&quot;… 소화기내과 교수의 체중 감량...</a> <span class="amet">· 네이버뉴스 11/11 19:00</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 72 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_info:b3b10827e325d2da">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">장 건강엔 보리, 콜레스테롤 관리 엔 귀리…골라 먹는 곡물</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://jhealthmedia.joins.com/news/articleView.html?idxno=33988" target="_blank" rel="noopener">장 건강엔 보리, 콜레스테롤 관리 엔 귀리…골라 먹는 곡물</a> <span class="amet">· 네이버뉴스 11/12 06:50</span></li><li><a href="http://www.thefirstmedia.net/news/articleView.html?idxno=213316" target="_blank" rel="noopener">한국 건강 관리협회, 수면 ·대사질환·기생충 감염 연구로 학술대회서 우...</a> <span class="amet">· 네이버뉴스 11/11 17:22</span></li><li><a href="https://health.chosun.com/site/data/html_dir/2026/11/10/2026111002259.html" target="_blank" rel="noopener">혈액 속 HDL 콜레스테롤 수치, 노년기 뇌 건강과 연관</a> <span class="amet">· 네이버뉴스 11/10 15:44</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 71 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_info:ad13ced00be7f5c5">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">KBS1 생로병사의 비밀…K-슈퍼푸드 3부 '찜, 불을 이긴 음식'</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.wikitree.co.kr/articles/1173888" target="_blank" rel="noopener">KBS1 생로병사의 비밀…K-슈퍼푸드 3부 '찜, 불을 이긴 음식'</a> <span class="amet">· 네이버뉴스 11/11 20:56</span></li><li><a href="https://www.nc.press/news/articleView.html?idxno=630696" target="_blank" rel="noopener">'생로병사의 비밀' 독일 약국에 들어간 홍삼·프랑스 미식가 사로잡은 ...</a> <span class="amet">· 네이버뉴스 11/11 07:27</span></li><li><a href="https://www.lecturernews.com/news/articleView.html?idxno=213578" target="_blank" rel="noopener">생로병사의 비밀, 홍삼·도라지·흑마늘…찜으로 달라지는 식재료의 가...</a> <span class="amet">· 네이버뉴스 11/11 06:00</span></li></ul>
+</article><article class="topic">
+<div class="tnum">05<span class="interest-badge">관심도 71 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:health_info:2b4527f87b6e6126">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">청소년 비만치료, 키·체중 변화와 동반질환 함께 살펴야</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://www.bokuennews.com/news/article.html?no=287046" target="_blank" rel="noopener">청소년 비만치료, 키·체중 변화와 동반질환 함께 살펴야</a> <span class="amet">· 네이버뉴스 11/12 11:22</span></li><li><a href="http://www.brainmedia.co.kr/BrainScience/25715" target="_blank" rel="noopener">알츠하이머 치료제 ‘레켐비’ 효과 높이려면 신체 상태 함께 살펴야</a> <span class="amet">· 네이버뉴스 11/11 21:06</span></li><li><a href="https://www.seoul.co.kr/news/life/health-news/2026/11/10/20261110016003?wlog_tag3=naver" target="_blank" rel="noopener">“당뇨병 환자 87%, 이상지질혈증 동반… 콜레스테롤 ·혈당·혈압 함께 ...</a> <span class="amet">· 네이버뉴스 11/10 05:03</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#6b7d3e"></span><h2>리빙</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 57 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:living:42b2bf384c08cfe2">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">한전, 에너지 캐시백 가입고객 200만호 돌파...탄소중립 기여 기후부장관...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://www.wsobi.com/news/articleView.html?idxno=321573" target="_blank" rel="noopener">한전, 에너지 캐시백 가입고객 200만호 돌파...탄소중립 기여 기후부장관...</a> <span class="amet">· 네이버뉴스 11/12 08:28</span></li><li><a href="https://daily.hankooki.com/news/articleView.html?idxno=1423325" target="_blank" rel="noopener">한전, 주택용 에너지 캐시백 가입 가구 200만호 돌파</a> <span class="amet">· 네이버뉴스 11/09 18:42</span></li><li><a href="http://www.e-platform.net/news/articleView.html?idxno=106816" target="_blank" rel="noopener">한전, 주택용 에너지 캐시백 가입 고객 200만호 돌파…핵심제도 '자리매...</a> <span class="amet">· 네이버뉴스 11/09 17:48</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#2f5b9c"></span><h2>카테크 · 자동차</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:cartech_auto:2e434e1a052aca8f">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">3Q 선전 삼성화재, 본업·투자·글로벌 '세 마리 토끼'</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.straightnews.co.kr/news/articleView.html?idxno=315221" target="_blank" rel="noopener">3Q 선전 삼성화재, 본업·투자·글로벌 '세 마리 토끼'</a> <span class="amet">· 네이버뉴스 11/12 11:22</span></li><li><a href="https://www.ziksir.com/news/articleView.html?idxno=153021" target="_blank" rel="noopener">삼성화재, 보험 본업 성장에 글로벌 확장까지…3분기 순익 1.87조</a> <span class="amet">· 네이버뉴스 11/12 10:56</span></li><li><a href="http://www.newsdream.kr/news/articleView.html?idxno=122017" target="_blank" rel="noopener">삼성화재, 3분기 누적 세전익 2조 5,030억… 보험 ·투자손익 동반 성장</a> <span class="amet">· 네이버뉴스 11/12 11:18</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:cartech_auto:aede48266ca5cb97">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">삼성화재, 누적 순익 1조8655억…&quot;캐노피우스 인수로 ROE 1~2%p↑&quot;(종합)</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.newsis.com/view/NISX20261112_0003865320" target="_blank" rel="noopener">삼성화재, 누적 순익 1조8655억…&quot;캐노피우스 인수로 ROE 1~2%p↑&quot;(종합)</a> <span class="amet">· 네이버뉴스 11/12 11:30</span></li><li><a href="https://www.pointe.co.kr/news/articleView.html?idxno=87624" target="_blank" rel="noopener">삼성화재, 3분기 누적 순익 1조8655억원…영국 캐노피우스 경영권 확보</a> <span class="amet">· 네이버뉴스 11/12 10:54</span></li><li><a href="https://www.mt.co.kr/finance/2026/11/12/2026111210105740074" target="_blank" rel="noopener">삼성화재, 3분기 누적 순익 1.86조…캐노피우스 투자손익 견인</a> <span class="amet">· 네이버뉴스 11/12 10:50</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:cartech_auto:1353bf17b7871195">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">한화손보, 올 3분기 순이익 961억… 보험 손익 196.7%↑</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.newstopkorea.com/news/articleView.html?idxno=48968" target="_blank" rel="noopener">한화손보, 올 3분기 순이익 961억… 보험 손익 196.7%↑</a> <span class="amet">· 네이버뉴스 11/12 11:14</span></li><li><a href="http://www.popcornnews.net/news/articleView.html?idxno=139766" target="_blank" rel="noopener">삼성화재, 3분기 누적 순익 1조8676억… 보험 손익 성장에 순익 개선</a> <span class="amet">· 네이버뉴스 11/12 10:38</span></li><li><a href="https://www.nextdaily.co.kr/news/articleView.html?idxno=254824" target="_blank" rel="noopener">삼성화재, 3분기 누적 순이익 1조8655억원…캐노피우스 지분 40% 추가 인...</a> <span class="amet">· 네이버뉴스 11/12 10:38</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 86 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:cartech_auto:3c2ed25b6c7875b1">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">기아, 獨 '2026 골든 스티어링 휠 어워드' 3관왕 쾌거</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://www.enewstoday.co.kr/news/articleView.html?idxno=2491522" target="_blank" rel="noopener">기아, 獨 '2026 골든 스티어링 휠 어워드' 3관왕 쾌거</a> <span class="amet">· 네이버뉴스 11/12 11:00</span></li><li><a href="http://autotimes.co.kr/detail.php?number=689957&amp;thread=27" target="_blank" rel="noopener">페라리 루체, 골든 스티어링 휠 혁신상 수상</a> <span class="amet">· 네이버뉴스 11/12 10:02</span></li><li><a href="https://biz.heraldcorp.com/article/10934553?ref=naver" target="_blank" rel="noopener">페라리 루체, ‘골든 스티어링 휠’ 최고 혁신상 수상 영예</a> <span class="amet">· 네이버뉴스 11/12 09:13</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#5a55a5"></span><h2>카테크 · IT</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 86 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:cartech_it:e686760fb0717743">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">폴리페놀팩토리, 건조 시간 1.9배 단축 '그래비티 퀵 드라이 샴푸' 출시</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://www.newsdream.kr/news/articleView.html?idxno=121992" target="_blank" rel="noopener">폴리페놀팩토리, 건조 시간 1.9배 단축 '그래비티 퀵 드라이 샴푸' 출시</a> <span class="amet">· 네이버뉴스 11/12 09:54</span></li><li><a href="https://www.megaeconomy.co.kr/news/newsview.php?ncode=1065572317243938" target="_blank" rel="noopener">&quot;홍합 접착, 머리 건조 시간 개선&quot;…폴리페놀팩토리, '퀵 드라이 샴푸' ...</a> <span class="amet">· 네이버뉴스 11/12 09:26</span></li><li><a href="https://www.viva100.com/article/20261112500008" target="_blank" rel="noopener">그래비티, 머리 말리는 시간 줄이는 ‘퀵 드라이 샴푸’ 출시</a> <span class="amet">· 네이버뉴스 11/12 08:04</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 82 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:cartech_it:f7a58bdebe26991a">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">폴더블 10대 중 7대가 삼성인데…애플 가세에 내년 '왕좌' 흔들릴까</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.newsis.com/view/NISX20261112_0003865153" target="_blank" rel="noopener">폴더블 10대 중 7대가 삼성인데…애플 가세에 내년 '왕좌' 흔들릴까</a> <span class="amet">· 네이버뉴스 11/12 10:59</span></li><li><a href="https://www.etnews.com/20261112000007" target="_blank" rel="noopener">IBM, 내년 1040큐비트 시스템 구축 추진…양자칩 두 개 연결</a> <span class="amet">· 오늘의뉴스 - 이티뉴스 11/12 07:33</span></li><li><a href="https://zdnet.co.kr/view/?no=20261111145714" target="_blank" rel="noopener">삼성-애플-샤오미, 엇갈린 스마트폰 성적표</a> <span class="amet">· 네이버뉴스 11/11 16:56</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 74 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:cartech_it:8970c306765d5bd1">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">&quot;설계 변경 없이 최신 낸드로 전환&quot;…샌디스크, 피지컬 AI·IoT용 'iNAND CL...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://digitalchosun.dizzo.com/site/data/html_dir/2026/11/11/2026111180026.html" target="_blank" rel="noopener">&quot;설계 변경 없이 최신 낸드로 전환&quot;…샌디스크, 피지컬 AI·IoT용 'iNAND CL...</a> <span class="amet">· 네이버뉴스 11/11 18:44</span></li><li><a href="https://www.cnet.co.kr/view/?no=20261111173605" target="_blank" rel="noopener">샌디스크, 피지컬 AI 및 IoT 전용 스토리지 ‘i낸드 CL EM181’ 공개</a> <span class="amet">· 네이버뉴스 11/11 17:40</span></li><li><a href="http://www.technoa.co.kr/news/articleView.html?idxno=101625" target="_blank" rel="noopener">샌디스크 e.MMC로 피지컬 AI IoT 겨냥, 신형 iNAND CL EM181 공개</a> <span class="amet">· 네이버뉴스 11/11 11:32</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 72 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:cartech_it:f11f29d36d931f70">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">&quot;글로벌 AI·로봇 각축장&quot; 다가오는 CES 2027, 어느 韓대기업 출격하나</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.newsis.com/view/NISX20261111_0003863409" target="_blank" rel="noopener">&quot;글로벌 AI·로봇 각축장&quot; 다가오는 CES 2027, 어느 韓대기업 출격하나</a> <span class="amet">· 네이버뉴스 11/11 15:51</span></li><li><a href="https://byline.network/?p=9004111222627097" target="_blank" rel="noopener">에이아이매틱스, AI 비전검사 플랫폼 ‘AIM-T1’으로 CES 2027 혁신상 2개...</a> <span class="amet">· 네이버뉴스 11/11 14:42</span></li><li><a href="https://zdnet.co.kr/view/?no=20261111100229" target="_blank" rel="noopener">에이아이매틱스, ‘AIM-T1’으로 CES 2027 혁신상 2관왕</a> <span class="amet">· 네이버뉴스 11/11 10:03</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#7c6650"></span><h2>고생물</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 36 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:paleontology:cab77cf45cd3205a">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">1억 년 전 ‘ 공룡 꼬리 자국’ 태화강서 발견</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.donga.com/news/Society/article/all/20261108/134987393/2" target="_blank" rel="noopener">1억 년 전 ‘ 공룡 꼬리 자국’ 태화강서 발견</a> <span class="amet">· 네이버뉴스 11/09 04:32</span></li><li><a href="https://www.usmbc.co.kr/NewsArticle/871231" target="_blank" rel="noopener">태화강서 1억 년 전 ' 공룡 꼬리 자국' 발견</a> <span class="amet">· 네이버뉴스 11/03 21:08</span></li><li><a href="http://www.enewstoday.co.kr/news/articleView.html?idxno=2488076" target="_blank" rel="noopener">울산 태화강변에 1억 년 전 공룡 의 발자취…국내 유일 보존 '꼬리 끌림...</a> <span class="amet">· 네이버뉴스 11/03 18:30</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#8a4f9d"></span><h2>방송연예</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:broadcast:5f403989d89e11b0">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">'5년째 공개 열애' 크러쉬-조이, 얼굴 없는 '삐그덕' 듀엣 영상 공개</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.nocutnews.co.kr/news/6605823?utm_source=naver&amp;utm_medium=article&amp;utm_campaign=20261112112308" target="_blank" rel="noopener">'5년째 공개 열애' 크러쉬-조이, 얼굴 없는 '삐그덕' 듀엣 영상 공개</a> <span class="amet">· 네이버뉴스 11/12 11:24</span></li><li><a href="https://www.news1.kr/entertain/celebrity-topic/6351367" target="_blank" rel="noopener">크러쉬♥조이, 공개 열애 6년째 애정 굳건…듀엣 깜짝 공개 [N이슈]</a> <span class="amet">· 네이버뉴스 11/12 09:40</span></li><li><a href="https://news.sbs.co.kr/news/endPage.do?news_id=N1008842316&amp;plink=RSSLINK&amp;cooper=RSSREADER" target="_blank" rel="noopener">'6년 열애' 크러쉬♥조이, '삐그덕' 듀엣 라이브 공개…반려견 안고 달달 케미</a> <span class="amet">· 방송/연예 - SBS 뉴스 섹션 11/12 09:32</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:broadcast:6325e23b4cf88c5a">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">김치 싸대기 맞고, 불륜녀랑 춤추는 젠슨황…엔비디아發 AI 역설</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.joongang.co.kr/article/25477968" target="_blank" rel="noopener">김치 싸대기 맞고, 불륜녀랑 춤추는 젠슨황…엔비디아發 AI 역설</a> <span class="amet">· 네이버뉴스 11/12 11:27</span></li><li><a href="https://www.spotvnews.co.kr/news/articleView.html?idxno=1019356" target="_blank" rel="noopener">'자칭 사랑꾼' 젠슨 황, 中 스파이 이어 사내 임원과도 불륜 의혹…이사...</a> <span class="amet">· 네이버뉴스 11/12 10:59</span></li><li><a href="http://www.tvdaily.co.kr/read.php3?aid=17944452571809344016" target="_blank" rel="noopener">“아내가 유일한 사랑&quot; 젠슨 황, 임원과도 불륜 의혹…이사회 해임 절차...</a> <span class="amet">· 네이버뉴스 11/12 10:04</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 85 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:broadcast:4f95f6a28932f2c6">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">존박 &quot;맥도날드 랩? 너무 고평가됐고 무서워졌다&quot;</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.news1.kr/entertain/celebrity-topic/6351730" target="_blank" rel="noopener">존박 &quot;맥도날드 랩? 너무 고평가됐고 무서워졌다&quot;</a> <span class="amet">· 네이버뉴스 11/12 11:27</span></li><li><a href="https://www.newsis.com/view/NISX20261112_0003864868" target="_blank" rel="noopener">존박 &quot;맥도날드 랩 인기 무서워…너무 고평가 됐다&quot;</a> <span class="amet">· 연예 11/12 09:24</span></li><li><a href="http://enews.imbc.com/News/RetrieveNewsInfo/524527" target="_blank" rel="noopener">넉살 &quot;존박, 랩 하면 안 돼…너무 위험한 종자&quot; [소셜in]</a> <span class="amet">· 네이버뉴스 11/12 10:15</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 81 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:broadcast:04d3ec9c434dafb7">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">마마무 문별, 사랑 고백 담은 새 화보…시즌 그리팅 콘셉트 포토 공개</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.topstarnews.net/news/articleView.html?idxno=16274641" target="_blank" rel="noopener">마마무 문별, 사랑 고백 담은 새 화보…시즌 그리팅 콘셉트 포토 공개</a> <span class="amet">· 네이버뉴스 11/12 11:28</span></li><li><a href="https://www.newsinside.kr/news/articleView.html?idxno=5046131" target="_blank" rel="noopener">도경수, 민들레 홀씨에 담은 팬 사랑</a> <span class="amet">· 네이버뉴스 11/12 09:16</span></li><li><a href="https://mhnse.com/news/articleView.html?idxno=1692153" target="_blank" rel="noopener">도경수, 순수한 사랑 담은 발라드 신곡 'Darling' 발매…11일 오후 6시 공...</a> <span class="amet">· 네이버뉴스 11/11 09:13</span></li></ul>
+</article><article class="topic">
+<div class="tnum">05<span class="interest-badge">관심도 80 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:broadcast:684e4a56c2d4d309">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">리센느, 디즈니 영화 '헥스: 마녀왕국' 버전 '위드' MV 공개</div>
+<p class="tbasis">연예 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.newsis.com/view/NISX20261112_0003864760" target="_blank" rel="noopener">리센느, 디즈니 영화 '헥스: 마녀왕국' 버전 '위드' MV 공개</a> <span class="amet">· 연예 11/12 11:19</span></li><li><a href="https://www.ajunews.com/view/20261112085311962" target="_blank" rel="noopener">'어벤져스: 엔드게임 앙코르' 13일 디즈니+ 공개…'둠스데이' 흥행 예열</a> <span class="amet">· 네이버뉴스 11/12 08:56</span></li><li><a href="https://www.etoday.co.kr/news/view/2646505" target="_blank" rel="noopener">디즈니+ '재혼 황후', 오늘(11일) 5·6화 공개 시간은?</a> <span class="amet">· 네이버뉴스 11/11 06:56</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#b36b00"></span><h2>스포츠</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:sports:8ee9354381c25866">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">LG, 오스틴과 200만 달러 재계약…KBO 외국인 타자 최고 몸값 경신</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.mdtoday.co.kr/news/articleView.html?idxno=624760" target="_blank" rel="noopener">LG, 오스틴과 200만 달러 재계약…KBO 외국인 타자 최고 몸값 경신</a> <span class="amet">· 네이버뉴스 11/12 11:30</span></li><li><a href="https://www.kukinews.com/article/view/kuk202611120086" target="_blank" rel="noopener">오스틴, LG와 200만 달러 재계약…외국인 타자 역대 최고 연봉</a> <span class="amet">· 네이버뉴스 11/12 11:30</span></li><li><a href="https://www.chosun.com/sports/baseball/2026/11/12/3CYCKO276ZDUBPAVZ2BOPYM2VU/?utm_source=naver&amp;utm_medium=referral&amp;utm_campaign=naver-news" target="_blank" rel="noopener">LG 오스틴 딘, 200만 달러에 2027시즌 재계약...외국인 타자 역대 최고액</a> <span class="amet">· 네이버뉴스 11/12 11:27</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:sports:05e55aae0bab298c">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">“김민재 형에게 많이 배우고 있다”…대표팀 소감 밝힌 '한국 축구 선...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.wikitree.co.kr/articles/1174008" target="_blank" rel="noopener">“김민재 형에게 많이 배우고 있다”…대표팀 소감 밝힌 '한국 축구 선...</a> <span class="amet">· 네이버뉴스 11/12 11:22</span></li><li><a href="https://mhnse.com/news/articleView.html?idxno=1693870" target="_blank" rel="noopener">'김민재와 함께 뛰는 날' 기다린 신민하, 첫 A대표팀서 특별 과외…&quot;압...</a> <span class="amet">· 네이버뉴스 11/12 11:16</span></li><li><a href="https://www.jemin.com/news/articleView.html?idxno=847113" target="_blank" rel="noopener">손흥민과 김민재, 논란 속 5인 공동 메시지…대표팀 운영 개선에 한목소...</a> <span class="amet">· 네이버뉴스 11/12 10:58</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:sports:9b309805885988b6">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">겨울에도 야구하는 삼성 배찬승·김백산·김현준, 호주 프로야구 브리즈...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://www.spochoo.com/news/articleView.html?idxno=132051" target="_blank" rel="noopener">겨울에도 야구하는 삼성 배찬승·김백산·김현준, 호주 프로야구 브리즈...</a> <span class="amet">· 네이버뉴스 11/12 11:29</span></li><li><a href="https://isplus.com/article/view/isp202611120064" target="_blank" rel="noopener">'좌승현·함수호처럼' 김백산-배찬승-김현준도 호주 유학 떠난다…삼성...</a> <span class="amet">· 네이버뉴스 11/12 11:17</span></li><li><a href="https://news.tf.co.kr/read/toto/2387933.htm" target="_blank" rel="noopener">김도영 앞세운 한국 야구 , 13일 APBC 한일전... 프로 토 승부식 135회차 대...</a> <span class="amet">· 네이버뉴스 11/12 11:05</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:sports:15f6366219dc8650">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">부천시 '4대 브랜드 스포츠' 집중 육성…지역경제·생활체육 '두 토끼'</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.mt.co.kr/policy/2026/11/12/2026111211111961465" target="_blank" rel="noopener">부천시 '4대 브랜드 스포츠' 집중 육성…지역경제·생활체육 '두 토끼'</a> <span class="amet">· 네이버뉴스 11/12 11:27</span></li><li><a href="https://news.tf.co.kr/read/national/2387942.htm" target="_blank" rel="noopener">부천시, '4대 브랜드 스포츠' 육성…시민 건강·도시 활력 높인다</a> <span class="amet">· 네이버뉴스 11/12 11:16</span></li><li><a href="https://www.segye.com/newsView/20261112506805?OutUrl=naver" target="_blank" rel="noopener">아이스링크, 도심 러닝, 프로축구 … 부천시, 시민 스포츠 참여 확대 지...</a> <span class="amet">· 네이버뉴스 11/12 11:04</span></li></ul>
+</article><article class="topic">
+<div class="tnum">05<span class="interest-badge">관심도 87 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:sports:67d7ae44f8a0b92b">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">선발 전환하자마자 국제대회까지…韓 우승 길목에서 중책 맡았다 &quot;SSG 위...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="http://www.osen.co.kr/article/G1112908801" target="_blank" rel="noopener">선발 전환하자마자 국제대회까지…韓 우승 길목에서 중책 맡았다 &quot;SSG 위...</a> <span class="amet">· 네이버뉴스 11/12 11:21</span></li><li><a href="https://www.newsis.com/view/NISX20261112_0003865056" target="_blank" rel="noopener">'고졸 루키' SSG 김민준, APBC 첫 경기 선발 중책…호주전 선발 등판</a> <span class="amet">· 스포츠 11/12 10:30</span></li><li><a href="https://www.nocutnews.co.kr/news/6605793?utm_source=naver&amp;utm_medium=article&amp;utm_campaign=20261112105708" target="_blank" rel="noopener">'우승 포수' 김민식, 정든 팀 떠난다…SSG, 선수·코치 9명 대거 정리</a> <span class="amet">· 네이버뉴스 11/12 10:58</span></li></ul>
+</article></section><section class="cat"><div class="cathead"><span class="dot" style="background:#b04e78"></span><h2>패션뷰티</h2></div><article class="topic">
+<div class="tnum">01<span class="interest-badge">관심도 83 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:fashion_beauty:a3932f4787b729b4">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">[뷰티톡톡] 컬리ㆍ에이피알ㆍ시그닉ㆍ코스메카코리아ㆍ 스킨 1004ㆍ그래비...</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.dnews.co.kr/uhtml/view.jsp?idxno=202611120951440170719" target="_blank" rel="noopener">[뷰티톡톡] 컬리ㆍ에이피알ㆍ시그닉ㆍ코스메카코리아ㆍ 스킨 1004ㆍ그래비...</a> <span class="amet">· 네이버뉴스 11/12 11:20</span></li><li><a href="https://www.ekn.kr/web/view.php?key=20261112027028699" target="_blank" rel="noopener">[똑똑한 케어 ] 에이피알, 스킨 1004, 리필드, 센슬, 이미인, 코스메카코리...</a> <span class="amet">· 네이버뉴스 11/12 11:00</span></li><li><a href="https://www.fntoday.co.kr/news/articleView.html?idxno=397683" target="_blank" rel="noopener">명인 화장품 , 홍콩 코스모프로프 참가·무신사 뷰티 성수 입점…국내외 ...</a> <span class="amet">· 네이버뉴스 11/11 16:38</span></li></ul>
+</article><article class="topic">
+<div class="tnum">02<span class="interest-badge">관심도 77 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:fashion_beauty:30e58f5d4537e581">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">hy, 올리브영 입점 없이 '아이오셀' 브랜드로 뷰티 플랫폼 본격화</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.newspim.com/news/view/20261112000389" target="_blank" rel="noopener">hy, 올리브영 입점 없이 '아이오셀' 브랜드로 뷰티 플랫폼 본격화</a> <span class="amet">· 네이버뉴스 11/12 10:43</span></li><li><a href="http://mbn.mk.co.kr/pages/news/newsView.php?category=mbn00003&amp;news_seq_no=5230259" target="_blank" rel="noopener">NUUL, 올리브영 온라인몰 입점…첫 제품 '올 스킨 베이스' 출시</a> <span class="amet">· 네이버뉴스 11/11 15:08</span></li><li><a href="http://www.ktnews.com/news/articleView.html?idxno=150067" target="_blank" rel="noopener">K-뷰티 다음 주자는 'K-헤어'…글로벌 시장 공략 본격화</a> <span class="amet">· 네이버뉴스 11/11 11:20</span></li></ul>
+</article><article class="topic">
+<div class="tnum">03<span class="interest-badge">관심도 66 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:fashion_beauty:4f563a7f85ded630">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">성수동 약국가에 부는 K-뷰티 바람…에스테틱 유통 확장</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.bosa.co.kr/news/articleView.html?idxno=3016215" target="_blank" rel="noopener">성수동 약국가에 부는 K-뷰티 바람…에스테틱 유통 확장</a> <span class="amet">· 네이버뉴스 11/12 06:22</span></li><li><a href="https://www.segye.com/newsView/20261110505462?OutUrl=naver" target="_blank" rel="noopener">“성수 일대 동선 하나로 잇는다”…무신사 100번째 매장 ‘무신사 뷰티 ...</a> <span class="amet">· 네이버뉴스 11/10 17:57</span></li><li><a href="http://www.consumernews.co.kr/news/articleView.html?idxno=767933" target="_blank" rel="noopener">[현장] 홍대 이어 성수까지 ' 뷰티 전쟁'…무신사, 700개 브랜드·1만개 ...</a> <span class="amet">· 네이버뉴스 11/10 15:26</span></li></ul>
+</article><article class="topic">
+<div class="tnum">04<span class="interest-badge">관심도 66 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:fashion_beauty:28a423ae26f89161">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">축제 열고 체험 늘리고…애경산업·올리브영·아모레, 고객 잡기 경쟁</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.segye.com/newsView/20261111516410?OutUrl=naver" target="_blank" rel="noopener">축제 열고 체험 늘리고…애경산업·올리브영·아모레, 고객 잡기 경쟁</a> <span class="amet">· 네이버뉴스 11/11 17:00</span></li><li><a href="https://www.ekn.kr/web/view.php?key=20261111023388259" target="_blank" rel="noopener">[똑똑한뷰티] CJ올리브영, 뉴셀렉트 이옴, SSG닷컴, 아모레퍼시픽, 티르...</a> <span class="amet">· 네이버뉴스 11/11 14:30</span></li><li><a href="http://www.4th.kr/news/articleView.html?idxno=2121474" target="_blank" rel="noopener">[유통소식] 애경산업, 홍대서 K-컬처 축제 개최</a> <span class="amet">· 네이버뉴스 11/10 06:00</span></li></ul>
+</article><article class="topic">
+<div class="tnum">05<span class="interest-badge">관심도 61 · 기사 기반</span></div>
+<div class="topic-tools"><label class="complete-toggle">
+<input class="topic-check" type="checkbox" data-topic-id="2026-11-12-113404:fashion_beauty:386e3225ade951b2">
+<span>완료 표시</span></label><span class="complete-note">이 브라우저에 저장</span></div>
+<div class="ttitle">피부 노화 연구부터 AI 맞춤형 쇼핑까지…뷰티업계, 개인화 경쟁 가속</div>
+<p class="tbasis">네이버뉴스 등 3개 기사</p>
+
+<ul class="arts"><li><a href="https://www.segye.com/newsView/20261111506714?OutUrl=naver" target="_blank" rel="noopener">피부 노화 연구부터 AI 맞춤형 쇼핑까지…뷰티업계, 개인화 경쟁 가속</a> <span class="amet">· 네이버뉴스 11/11 19:02</span></li><li><a href="https://www.newsis.com/view/NISX20261111_0003863300" target="_blank" rel="noopener">아모레퍼시픽, 피부 노화 되돌리는 '역노화' 기술 규명…장벽 개선 확인</a> <span class="amet">· 네이버뉴스 11/11 11:09</span></li><li><a href="http://dream.kotra.or.kr/kotranews/cms/news/actionKotraBoardDetail.do?SITE_NO=3&amp;MENU_ID=110&amp;CONTENTS_NO=1&amp;bbsGbn=245&amp;bbsSn=245&amp;pNttSn=244926" target="_blank" rel="noopener">러시아 뷰티 시장의 다음 경쟁력은? InterCHARM 2026 현장을 가다</a> <span class="amet">· 네이버뉴스 11/05 11:56</span></li></ul>
+</article></section>
+<footer>같은 날짜에 다시 실행된 브리핑도 이 페이지에서 확인할 수 있습니다.</footer>
+</div><script>
+(() => {
+  const storageKey = 'blogBriefingCompletedTopics';
+  const read = () => {
+    try { return JSON.parse(localStorage.getItem(storageKey) || '{}'); }
+    catch (_) { return {}; }
+  };
+  const write = (value) => {
+    try { localStorage.setItem(storageKey, JSON.stringify(value)); }
+    catch (_) {}
+  };
+  const refresh = () => {
+    const saved = read();
+    let done = 0;
+    document.querySelectorAll('.topic-check').forEach((input) => {
+      const checked = Boolean(saved[input.dataset.topicId]);
+      input.checked = checked;
+      const card = input.closest('.topic');
+      if (card) card.classList.toggle('completed', checked);
+      if (checked) done += 1;
+    });
+    document.querySelectorAll('[data-check-summary]').forEach((el) => {
+      el.textContent = `완료 ${done} / 전체 ${document.querySelectorAll('.topic-check').length}`;
+    });
+  };
+  document.querySelectorAll('.topic-check').forEach((input) => {
+    input.addEventListener('change', () => {
+      const saved = read();
+      if (input.checked) saved[input.dataset.topicId] = true;
+      else delete saved[input.dataset.topicId];
+      write(saved);
+      refresh();
+    });
+  });
+  document.querySelectorAll('[data-reset-checks]').forEach((button) => {
+    button.addEventListener('click', () => {
+      if (!window.confirm('이 페이지의 완료 표시를 모두 지울까요?')) return;
+      const saved = read();
+      document.querySelectorAll('.topic-check').forEach((input) => delete saved[input.dataset.topicId]);
+      write(saved);
+      refresh();
+    });
+  });
+  document.querySelectorAll('[data-title-picker]').forEach((picker) => {
+    const selected = picker.querySelector('[data-selected-title]');
+    const copyButton = picker.querySelector('[data-copy-title]');
+    const inputs = picker.querySelectorAll('input[name="headline"]');
+    inputs.forEach((input) => input.addEventListener('change', () => {
+      if (selected) selected.textContent = input.value;
+    }));
+    if (copyButton) copyButton.addEventListener('click', async () => {
+      const input = picker.querySelector('input[name="headline"]:checked');
+      if (!input) { if (selected) selected.textContent = '먼저 제목을 선택하세요.'; return; }
+      try {
+        await navigator.clipboard.writeText(input.value);
+        if (selected) selected.textContent = '복사 완료: ' + input.value;
+      } catch (_) {
+        if (selected) selected.textContent = '복사할 제목: ' + input.value;
+      }
+    });
+  });
+  refresh();
+})();
+</script></body></html>
